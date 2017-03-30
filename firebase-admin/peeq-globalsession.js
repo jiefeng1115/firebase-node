@@ -5,74 +5,90 @@ var peeqDatastore = require("./peeq-datastore");
 var datastore = peeqDatastore.datastore;
 
 var peeqLocalSession = require("./peeq-localsession");
+var peeqLocationRecord = require("./peeq-locationrecord");
 
-exports.createIfNeeded = function(localSessionId, callback) {
-  peeqLocalSession.snapshot(localSessionId, function(snapshot) {
-    if (snapshot.exists()) {
-      /*
-      //Check if localSessionId already exist in any globalSession
-      containsInDS(localSessionId, function(err, result, entity) {
-        console.log("result", result);
-        if (result == true) {
+exports.createIfNeededWith = function(localSessionId) {
+  //fetch the localSession
+  return peeqLocalSession.snapshotOf(localSessionId).then(function(localSessionSnapshot) {
+    if (localSessionSnapshot) {
+      console.log("localSessionSnapshot", localSessionSnapshot.val());
 
+      //fetch its latest GeoPoint
+      return peeqLocationRecord.latestGeoPointOf(localSessionId).then(function(geoPoint) {
+        console.log("geoPoint", geoPoint);
+        if (geoPoint) {
+
+          return queryNearestGlobalSession(localSessionSnapshot, geoPoint);
+
+
+          //otherwise createGlobalSessionInDS with the localSession snapshot
+          //return createGlobalSessionInDS(localSessionSnapshot, geoPoint);
         }
         else {
-
+          return Promise.reject("geoPoint not found " + localSessionId);
         }
       });
-      */
-
-      //Check if there is a GlobalSessionEntity in range for the localSession
-      queryNearestGlobalSession(snapshot, function(err, entities) {
-        if (!err) {
-            console.log("entities", entities);
-        }
-        else {
-            console.error(err);
-        }
-      });
-
-      //otherwise createGlobalSessionInDS wiht the localSession snapshot
-      //createGlobalSessionInDS(snapshot, callback);
     }
     else {
-      var error = new Error("localSession not found " + localSessionId);
-      console.error(error);
-      callback(error);
+      return Promise.reject("localSession not found " + localSessionId);
     }
+
+
+    /*
+    //Check if localSessionId already exist in any globalSession
+    containsInDS(localSessionId, function(err, result, entity) {
+      console.log("result", result);
+      if (result == true) {
+
+      }
+      else {
+
+      }
+    });
+    */
+/*
+    //Check if there is a GlobalSessionEntity in range for the localSession
+    queryNearestGlobalSession(snapshot, function(err, entities) {
+      if (!err) {
+          console.log("entities", entities);
+      }
+      else {
+          console.error(err);
+      }
+    });
+*/
+
+
   });
 };
 
 //GlobalSessionEntity constructor from localSessionSnapshot
-function GlobalSessionEntity(localSessionSnapshot) {
+//TODO: add Ancestor paths for the Entity
+function GlobalSessionEntity(localSessionSnapshot, geoPoint) {
     var val = localSessionSnapshot.val();
-    console.log("localSession", localSessionSnapshot.key, val);
-    //var startDate = new Date(val.startDate);
+    //console.log("localSession", localSessionSnapshot.key, val);
     this.key = datastore.key(['GlobalSession']);
     this.data = {
       user: val.user,
       channel: val.channel,
-      //startDate: new Date(val.startDate),                   //!!! FIXME: Date and Time object not working in query filter, map it to milliseconds with getTime() instead
-      startTime: new Date(val.startDate).getTime(),
+      startDate: new Date(val.startDate),
+      geoPoint: geoPoint,
       devices: [val.device],
       localSessions: [localSessionSnapshot.key]
     };
 };
 
-createGlobalSessionInDS = function (localSessionSnapshot, callback) {
-  var entity = new GlobalSessionEntity(localSessionSnapshot);
-  datastore.save(entity, function(err) {
-    if (!err) {
-      console.log("saved", entity);
-      callback(err, entity);
-    }
-    else {
-      console.error(err);
-      callback(err);
-    }
+//return a promise of the GlobalSessionEntity
+createGlobalSessionInDS = function (localSessionSnapshot, geoPoint) {
+  var entity = new GlobalSessionEntity(localSessionSnapshot, geoPoint);
+  return datastore.save(entity).then(function(data) {
+    var apiResponse = data[0];
+    console.log("createGlobalSessionInDS apiResponse", apiResponse);
+    return Promise.resolve(entity);
   });
 };
 
+/*
 containsInDS = function(localSessionId, callback) {
   var query = datastore.createQuery('GlobalSession');
   query.filter('localSessions',[localSessionId]);   //!!! FIXME filter in should be used instead of =
@@ -91,8 +107,9 @@ containsInDS = function(localSessionId, callback) {
       }
   });
 };
+*/
 
-queryNearestGlobalSession = function (localSessionSnapshot, callback) {
+queryNearestGlobalSession = function (localSessionSnapshot, geoPoint) {
   const hourRangeFromStartDate = 2;
 
   var val = localSessionSnapshot.val();
@@ -101,21 +118,20 @@ queryNearestGlobalSession = function (localSessionSnapshot, callback) {
   upperDate.setHours(startDate.getHours() + hourRangeFromStartDate);
   var lowerDate = new Date(val.startDate);
   lowerDate.setHours(startDate.getHours() - hourRangeFromStartDate);
-  //console.log("startDate range", lowerDate, upperDate);
-  console.log("startDate range", lowerDate.getTime(), upperDate.getTime());
+  console.log("startDate range", lowerDate, upperDate);
 
   var query = datastore.createQuery('GlobalSession');
   query.filter('user', val.user);
   query.filter('channel', val.channel);
-  //query.filter('startDate','<', upperDate);
-  //query.filter('startDate','>=', lowerDate);
-  //query.filter('startTime','<', upperDate.getTime());
-  //query.filter('startTime','>', lowerDate.getTime());
-  query.filter('startTime','>',startDate.getTime());
-
+  query.filter('startDate','<', upperDate);
+  query.filter('startDate','>', lowerDate);
   query.limit(1);
 
-  datastore.runQuery(query, callback);
-}
+  return query.run().then(function(data) {
+    var entities = data[0];
+    //console.log("entities", entities);
+    return Promise.resolve(entities);
+  });
+};
 
 //!!! TODO: Merge duplicated GlobalSessionEntity
