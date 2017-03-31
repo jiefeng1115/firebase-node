@@ -7,10 +7,9 @@ admin.initializeApp({
 
 exports.admin = admin;
 
-var database = admin.database();
-
 //return a promise of snapshot? of the input refPath
 exports.snapshotOf = function(refPath) {
+  var database = admin.database();
   return database.ref(refPath).once("value").then(function(snapshot) {
     return new Promise((resolve, reject) => {
       snapshot.exists() ? resolve(snapshot) : resolve(null);

@@ -1,6 +1,6 @@
 var peeqFirebase = require("./peeq-firebase");
 var admin = peeqFirebase.admin;
-var database = admin.database();
+//var database = admin.database();
 
 /*
 //Date
@@ -8,8 +8,8 @@ var date = new Date('2017-03-28T19:15:26.387Z');
 console.log("date", date);
 */
 
-var testLocalSessionId = "-KgLL16nyOS2YsgHe9fV";
-
+//var testLocalSessionId = "-KgLL16nyOS2YsgHe9fV";
+var testLocalSessionId = "-KgaHHJXnPVL-_8kamLe";
 
 var peeqLocationRecord = require("./peeq-locationrecord");
 /*
@@ -34,13 +34,27 @@ peeqLocationRecord.latestGeoPointOf(testLocalSessionId).then(function(geoPoint) 
 });
 */
 
-/*
+
 var peeqLocalSession = require("./peeq-localsession");
+/*
 peeqLocalSession.snapshotOf(testLocalSessionId).then(function(snapshot) {
-  console.error("resolve", snapshot ? snapshot.val() : snapshot);
+  console.log("resolve", snapshot ? snapshot.val() : snapshot);
 }, function(err) {
   console.error("reject", err);
 });
+*/
+
+var localSession = new peeqLocalSession.LocalSession(testLocalSessionId);
+//console.log(localSession);
+/*
+localSession.fetchSnapshotIfNeeded().then(function(snapshot) {
+  console.log(snapshot.val());
+});
+*/
+localSession.fetchRelatedLocalSessions();
+//peeqLocalSession.test();
+
+/*
 peeqLocalSession.snapshotOf(testLocalSessionId+123).then(function(snapshot) {
   console.error("resolve", snapshot ? snapshot.val() : snapshot);
 }, function(err) {
@@ -48,16 +62,19 @@ peeqLocalSession.snapshotOf(testLocalSessionId+123).then(function(snapshot) {
 });
 */
 
+
+
 /*
 var GeoPoint = require('geopoint');
 var geoPoint = new GeoPoint(37.40471790548172, -121.9748698176089);
 console.log("geoPoint", geoPoint);
 */
 
-
+/*
 var peeqGlobalSession = require("./peeq-globalsession");
 peeqGlobalSession.createIfNeededWith(testLocalSessionId).then(function(obj) {
   console.log("resolve", obj);
 }, function(err) {
   console.error("reject", err);
 });
+*/
