@@ -33,48 +33,39 @@ exports.LocalSession = function LocalSession (id) {
   };
 
 
-
-
-
-
-  this.fetchRelatedLocalSessions = function() {
+  //return promise of RelatedPlayerHighLightSnapshots array
+  //TODO: FIREBASE WARNING: Using an unspecified index. Consider adding ".indexOn": "timestamp" at /playerHighlights to your security rules for better performance
+  this.fetchRelatedPlayerHighLightSnapshots = function() {
     return this.fetchSnapshotIfNeeded().then(function(snapshot) {
         if ((snapshot) && (snapshot.exists())) {
           var val = snapshot.val();
+          //console.log("val", val);
 
           var db = admin.database();
-          var ref = db.ref("localSessions");
-          return ref.orderByChild("user").equalTo(val.user).once("value").then(function(snapshot) {
-            //console.log(snapshot.val());
+          var ref = db.ref("playerHighlights");
 
-//snapshot.forEach({})
+          return ref.orderByChild("timestamp").startAt(val.startDate).endAt(val.endDate).once("value").then(function(filteredSnapshot) {
 
+            //console.log("filteredSnapshot.val", filteredSnapshot.val());
+            var relatedSnapshots = [];
 
+            filteredSnapshot.forEach(function(childSnapshot) {
+              if (peeqFirebase.isRelated(snapshot, childSnapshot)) {
+                  //console.log("isRelated", childSnapshot.val());
+                  relatedSnapshots.push(childSnapshot);
+              }
+            });
+
+            return Promise.resolve(relatedSnapshots);
 
           });
-        }
-        else {
-          Promise.reject("invalid snapshot");
-        }
-    });
-  };
-
-
-
-/*
-  this.fetchRelatedHighLightRecords = function() {
-    return this.fetchSnapshotIfNeeded().then(function(snapshot) {
-        if ((snapshot) && (snapshot.exists())) {
-          var val = snapshot.val();
-
-
 
         }
         else {
-          Promise.reject("invalid snapshot");
+          Promise.reject("invalid localSession");
         }
     });
   };
-*/
+  //End of fetchRelatedPlayerHighLightSnapshots
 
 };

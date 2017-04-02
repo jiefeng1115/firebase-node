@@ -1,5 +1,7 @@
 var admin = require("firebase-admin");
 var serviceAccount = require("./serviceAccountKey.json");
+var GeoPoint = require('geopoint');
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://peeq-b81e7.firebaseio.com"
@@ -32,4 +34,22 @@ exports.firstChildOf = function(snapshot) {
       resolve(null);
     }
   });
+};
+
+//return bool
+exports.isNearByGeoPoint = function(val1, val2) {
+  val1.geoPoint = new GeoPoint(val1.location.latitude, val1.location.longitude);
+  val2.geoPoint = new GeoPoint(val2.location.latitude, val2.location.longitude);
+  var distance = val1.geoPoint.distanceTo(val2.geoPoint); //miles
+  return (distance <= 1.0);
+};
+
+//return bool, for localSession vs localSession, and localSession vs playerHighlight
+exports.isRelated = function(snapshot1, snapshot2) {
+  if ((snapshot1.exists) && (snapshot2.exists)) {
+    val1 = snapshot1.val();
+    val2 = snapshot2.val();
+    return ((val1.user == val2.user) && (val1.channel == val2.channel) && (exports.isNearByGeoPoint(val1,val2)));
+  }
+  return false;
 };

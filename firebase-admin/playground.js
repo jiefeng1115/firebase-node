@@ -9,7 +9,8 @@ console.log("date", date);
 */
 
 //var testLocalSessionId = "-KgLL16nyOS2YsgHe9fV";
-var testLocalSessionId = "-KgaHHJXnPVL-_8kamLe";
+//var testLocalSessionId = "-KgaHHJXnPVL-_8kamLe";
+var testLocalSessionId = "-Kge7YaMlW-Ksk-gLoQJ";
 
 var peeqLocationRecord = require("./peeq-locationrecord");
 /*
@@ -51,7 +52,16 @@ localSession.fetchSnapshotIfNeeded().then(function(snapshot) {
   console.log(snapshot.val());
 });
 */
-localSession.fetchRelatedLocalSessions();
+//localSession.fetchRelatedLocalSessions();
+
+localSession.fetchRelatedPlayerHighLightSnapshots().then(function(relatedSnapshots) {
+  relatedSnapshots.forEach(function(snapshot) {
+    console.log(snapshot.val());
+  });
+}, function(err) {
+  console.error(err);
+});
+
 //peeqLocalSession.test();
 
 /*
