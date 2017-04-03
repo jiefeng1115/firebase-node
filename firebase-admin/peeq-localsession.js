@@ -8,6 +8,7 @@ exports.snapshotOf = function(id) {
 };
 */
 
+/*
 exports.test = function() {
   var db = admin.database();
   var ref = db.ref("localSessions");
@@ -15,24 +16,39 @@ exports.test = function() {
     console.log(snapshot.val());
   });
 };
+*/
 
-exports.LocalSession = function LocalSession (id) {
+exports.LocalSession = function LocalSession (id, snapshot) {
   this.id = id;
+  if (snapshot) {
+    this.snapshot = snapshot;
+  }
 
-  //return a promise of snapshot?
+  //return a promise of the original obj, with snapshot assigned to obj.snapshot
   this.fetchSnapshot = function() {
-    return peeqFirebase.snapshotOf("localSessions/" + this.id).then(function(snapshot) {
-      this._snapshot = snapshot;
-      return Promise.resolve(snapshot);
+    var obj = this;
+    return peeqFirebase.snapshotOf("localSessions/" + obj.id).then(function(snapshot) {
+      if ((snapshot) && (snapshot.exists())) {
+        obj.snapshot = snapshot;
+        obj.val = snapshot.val();
+        return Promise.resolve(obj);
+      }
+      else {
+        return Promise.reject("invalid snapshot" + obj.id);
+      }
     });
   };
 
-  //return a promise of snapshot?
+  //return a promise of the original obj, with snapshot assigned to obj.snapshot
   this.fetchSnapshotIfNeeded = function() {
-    return (this._snapshot ? Promise.resolve(this._snapshot) : this.fetchSnapshot());
+    return (this.snapshot ? Promise.resolve(this) : this.fetchSnapshot());
   };
 
 
+
+
+
+/*
   //return promise of RelatedPlayerHighLightSnapshots array
   //TODO: FIREBASE WARNING: Using an unspecified index. Consider adding ".indexOn": "timestamp" at /playerHighlights to your security rules for better performance
   this.fetchRelatedPlayerHighLightSnapshots = function() {
@@ -67,5 +83,6 @@ exports.LocalSession = function LocalSession (id) {
     });
   };
   //End of fetchRelatedPlayerHighLightSnapshots
+*/
 
-};
+};    //End of exports.LocalSession

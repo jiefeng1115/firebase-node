@@ -53,3 +53,17 @@ exports.isRelated = function(snapshot1, snapshot2) {
   }
   return false;
 };
+
+exports.snapshotsToArray = function(snapshots, filterFunction) {
+    var output = [];
+
+    snapshots.forEach(function(childSnapshot) {
+      output.push(childSnapshot);
+    });
+
+    if (filterFunction) {
+      output.filter(filterFunction);
+    }
+
+    return output;
+};

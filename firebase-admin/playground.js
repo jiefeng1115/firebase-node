@@ -11,10 +11,8 @@ console.log("toISOString", date.toISOString());
 */
 
 
-//var testLocalSessionId = "-KgLL16nyOS2YsgHe9fV";
-//var testLocalSessionId = "-KgaHHJXnPVL-_8kamLe";
-var testLocalSessionId = "-Kge7YaMlW-Ksk-gLoQJ";
-
+var testLocalSessionId = "-KgpXL4n705tBzMeuKOy";
+var testPlayerHighlightId = "-KgpXeHkTxyS3C7LgRK-";
 
 //LocationRecord ============================
 var peeqLocationRecord = require("./peeq-locationrecord");
@@ -54,22 +52,31 @@ localSession.fetchSnapshotIfNeeded().then(function(snapshot) {
 localSession.fetchRelatedPlayerHighLightSnapshots().then(function(relatedSnapshots) {
   //console.log(relatedSnapshots);
   relatedSnapshots.forEach(function(snapshot) {
-    console.log(snapshot.val());
+    console.log(snapshot.key, snapshot.val());
   });
 }, function(err) {
   console.error(err);
 });
 */
 
+//PlayerHighlight ===============================
+//TODO: FIREBASE WARNING: Using an unspecified index. Consider adding ".indexOn": "endDate" at /localSessions to your security rules for better performance
+
+var peeqPlayerHighlight = require("./peeq-playerhighlight");
+var playerHighlight = new peeqPlayerHighlight.PlayerHighlight(testPlayerHighlightId);
 /*
-peeqLocalSession.snapshotOf(testLocalSessionId+123).then(function(snapshot) {
-  console.error("resolve", snapshot ? snapshot.val() : snapshot);
+playerHighlight.fetchRelatedLocalSessionSnapshots().then(function(relatedSnapshots) {
+  //console.log(relatedSnapshots);
+  relatedSnapshots.forEach(function(snapshot) {
+    console.log(snapshot.key, snapshot.val());
+  });
 }, function(err) {
-  console.error("reject", err);
+  console.error(err);
 });
 */
-
-
+playerHighlight.generateHighlightIfNeeded().then(function(value) {
+  console.log("value", value);
+});
 
 //GeoPoint =============================
 /*

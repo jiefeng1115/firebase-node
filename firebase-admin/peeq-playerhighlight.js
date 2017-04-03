@@ -1,95 +1,146 @@
 var peeqFirebase = require("./peeq-firebase");
 var admin = peeqFirebase.admin;
-var peeqDate = require("/peeq-date");
+var peeqDate = require("./peeq-date");
+var peeqSensorRecord = require("./peeq-sensorrecord");
 
 exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
   this.id = id;
   if (snapshot) {
-    this._snapshot = snapshot;
+    this.snapshot = snapshot;
   }
 
-  //return a promise of snapshot?
+  //return a promise of the original obj, with snapshot assigned to obj.snapshot
   this.fetchSnapshot = function() {
-    return peeqFirebase.snapshotOf("playerHighlights/" + this.id).then(function(snapshot) {
-      this._snapshot = snapshot;
-      return Promise.resolve(snapshot);
+    var obj = this;
+    return peeqFirebase.snapshotOf("playerHighlights/" + obj.id).then(function(snapshot) {
+      if ((snapshot) && (snapshot.exists())) {
+        obj.snapshot = snapshot;
+        obj.val = snapshot.val();
+        return Promise.resolve(obj);
+      }
+      else {
+        return Promise.reject("invalid snapshot" + obj.id);
+      }
     });
   };
 
-  //return a promise of snapshot?
+  //return a promise of the original obj, with snapshot assigned to obj.snapshot
   this.fetchSnapshotIfNeeded = function() {
-    return (this._snapshot ? Promise.resolve(this._snapshot) : this.fetchSnapshot());
+    return (this.snapshot ? Promise.resolve(this) : this.fetchSnapshot());
   };
 
 
-  //return promise of RelatedLocalSessionSnapshots array
+  //return a promise of the original obj, with RelatedLocalSessionSnapshots assigned to obj.relatedLocalSessionSnapshots
   this.fetchRelatedLocalSessionSnapshots = function() {
-    return this.fetchSnapshotIfNeeded().then(function(snapshot) {
-        if ((snapshot) && (snapshot.exists())) {
-          var val = snapshot.val();
+    console.log("fetchRelatedLocalSessionSnapshots PlayerHighlight", this.id);
+    return this.fetchSnapshotIfNeeded().then(function(obj) {
 
-          var db = admin.database();
-          var ref = db.ref("localSessions");
+      var val = obj.val;
+//console.log("obj.val", val);
 
-          var endAtStr = peeqDate.dateStrWithTimeOffset(val.timestamp, (3600000*6));
-          console.log("endAtStr", endAtStr);
+      var db = admin.database();
+      var ref = db.ref("localSessions");
 
-          return ref.orderByChild("endDate").startAt(val.timestamp).endAt(endAtStr).once("value").then(function(filteredSnapshot) {
+      var highlightedPDate = new peeqDate.PDate(val.timestamp);
 
-            //console.log("filteredSnapshot.val", filteredSnapshot.val());
-            var relatedSnapshots = [];
+      var startAtStr = val.timestamp;
+      var endAtStr = highlightedPDate.dateStrWithTimeOffset(3600000*6);
+      //console.log("endAtStr", endAtStr);
 
-            filteredSnapshot.forEach(function(childSnapshot) {
-              if (peeqFirebase.isRelated(snapshot, childSnapshot)) {
-                  //console.log("isRelated", childSnapshot.val());
-                  relatedSnapshots.push(childSnapshot);
-              }
-            });
+      return ref.orderByChild("endDate").startAt(startAtStr).endAt(endAtStr).once("value").then(function(filteredSnapshots) {
 
-            return Promise.resolve(relatedSnapshots);
+        var relatedSnapshots = [];
+        filteredSnapshots.forEach(function(childSnapshot) {
+//console.log("childSnapshot", childSnapshot.val());
+          if ((childSnapshot.val().startDate < val.timestamp) && (peeqFirebase.isRelated(obj.snapshot, childSnapshot))) {
+              relatedSnapshots.push(childSnapshot);
+//console.log("relatedSnapshots", relatedSnapshots);
+          }
+        });
+        obj.relatedLocalSessionSnapshots = relatedSnapshots;
+//console.log("obj.relatedLocalSessionSnapshots", obj.relatedLocalSessionSnapshots);
 
-          });
-
-        }
-        else {
-          Promise.reject("invalid playerHighlight");
-        }
+        return Promise.resolve(obj);
+      });
     });
+  };    //End of fetchRelatedLocalSessionSnapshots
+
+
+  //return a promise of the original obj, with obj.trackerStatistics[localSessionId][targetPlayerId] updated
+  this.fetchTrackerStatisticOfLocalSessionInTimeWindow = function(localSessionSnapshot, startPDate, endPDate) {
+    var obj = this;
+    var localSessionId = localSessionSnapshot.key;
+    console.log("fetchTrackerStatisticOfLocalSessionInTimeWindow localSessionId", localSessionId);
+
+    var db = admin.database();
+    var ref = db.ref("sensorRecords/" + localSessionId);
+
+    var tracker = {};
+
+    return ref.orderByChild("timestamp").startAt(startPDate.dateStr).endAt(endPDate.dateStr).once("value").then(function(filteredSnapshots) {
+        //console.log("sensorRecords filteredSnapshots", filteredSnapshots.val());
+
+        if (!tracker[localSessionId]) {
+          tracker[localSessionId] = {};
+        }
+
+        var snapshotsArray = peeqFirebase.snapshotsToArray(filteredSnapshots);
+        var targetPlayerIds = Object.keys(obj.val.players);
+        console.log("filteredSnapshots", filteredSnapshots.numChildren(), "targetPlayerIds", targetPlayerIds);
+
+        targetPlayerIds.forEach(function(targetPlayerId) {
+          console.log("targetPlayerId",targetPlayerId);
+          var filteredArray = snapshotsArray.filter(function(element) {
+            var playerId = element.val().player;
+            return (playerId == targetPlayerId);
+          });
+          //console.log("filteredArray", filteredArray.length);
+          var statistic = peeqSensorRecord.calculateStatisticFromSnapshotArray(filteredArray);
+          //console.log("statistic", statistic);
+
+          tracker[localSessionId][targetPlayerId] = statistic;
+        });
+
+        console.log("tracker", tracker);
+        return Promise.resolve(tracker);
+    });
+  };        //End of fetchTrackerStatisticOfLocalSessionInTimeWindow
+
+
+  //return all promise of each fetchTrackerStatisticOfLocalSessionInTimeWindow
+  this.generateTrackerStatisticIfNeeded = function() {
+    var obj = this;
+    console.log("generateTrackerStatisticIfNeeded", obj.id);
+
+    var highlightedPDate = new peeqDate.PDate(obj.val.timestamp);
+    var startPDate = highlightedPDate.PDateWithTimeOffset(-1000*15);    //10sec
+    var endPDate = highlightedPDate.PDateWithTimeOffset(1000*5);        //5sec
+
+    console.log("time window", startPDate.dateStr, endPDate.dateStr);
+
+    var promises = [];
+
+    if (!obj.trackerStatistics) {
+      obj.trackerStatistics = {};
+    }
+
+    obj.relatedLocalSessionSnapshots.forEach(function(localSessionSnapshot) {
+      //console.log("localSessionSnapshot",localSessionSnapshot.key, localSessionSnapshot.val());
+      var prom = obj.fetchTrackerStatisticOfLocalSessionInTimeWindow(localSessionSnapshot, startPDate, endPDate);
+      promises.push(prom);
+    });
+
+    return Promise.all(promises);
   };
-  //End of fetchRelatedLocalSessionSnapshots
-
-
 
 
   this.generateHighlightIfNeeded = function() {
-    return this.fetchSnapshotIfNeeded().then(function(snapshot) {
-
-      if ((snapshot) && (snapshot.exists())) {
-
-        var val = snapshot.val();
-        //console.log("val", val);
-
-        return this.fetchRelatedLocalSessionSnapshots().then(function(relatedLocalSessionSnapshots) {
-          relatedLocalSessionSnapshots.forEach(function(childSnapshot) {
-            console.log("relatedLocalSession", childSnapshot.val());
-          });
-        });
-
-
-
-
-
-
-
-
-
-
-
-      }
-      else {
-        Promise.reject("invalid playerHighlight");
-      }
-
+    console.log("generateHighlightIfNeeded", this.id);
+    return this.fetchRelatedLocalSessionSnapshots().then(function(obj) {
+      return obj.generateTrackerStatisticIfNeeded().then(function(trackers) {
+          console.log("trackers", trackers);
+      });
     });
-  };
-};
+  };    //end of generateHighlightIfNeeded
+
+};    //End of exports.PlayerHighlight
