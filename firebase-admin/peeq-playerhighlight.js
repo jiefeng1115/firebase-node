@@ -3,6 +3,7 @@ var admin = peeqFirebase.admin;
 var peeqDate = require("./peeq-date");
 var peeqSensorRecord = require("./peeq-sensorrecord");
 var firstBy = require('thenby');
+var peeqPlayerHighlightVideo = require("./peeq-playerhighlightvideo");
 
 const highlightedPDateOffsetStart = -1000*15;       //TODO: Make this dynamic depends on the tracker data
 const highlightedPDateOffsetEnd = 1000*5;
@@ -149,12 +150,13 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
     var promises = [];
     obj.relatedLocalSessionSnapshots.forEach(function(localSessionSnapshot) {
       //console.log("localSessionSnapshot",localSessionSnapshot.key, localSessionSnapshot.val());
-      var prom = peeqSensorRecord.fetchTrackerStatisticOfLocalSessionInTimeWindow(localSessionSnapshot, startPDate, endPDate, obj.val.players);
+      var prom = obj.fetchTrackerStatisticOfLocalSessionInTimeWindow(localSessionSnapshot, startPDate, endPDate);
       promises.push(prom);
     });
     return Promise.all(promises);
   };    //end of generateTrackerStatisticIfNeeded
 
+  //return a promise of the firebase transaction for creating the playerHighlightVideos reocrd
   this.shouldGenerateHighlightWithStatistics = function(stats) {
     //console.log("shouldGenerateHighlightWithLocalSessionIds", localSessionIds);
     if (stats.length > 0) {
@@ -172,7 +174,6 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
       //var refStr = "playerHighlightVideos/" + this.val.user + "/" + this.snapshot.key; //console.log("refStr", refStr);
       var ref = db.ref("playerHighlightVideos/" + this.val.user + "/" + this.snapshot.key);
 
-/*
       return ref.transaction(function(currentData) {
           if (currentData === null) {
             var newRecord = {0: {
@@ -183,26 +184,39 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
           }
           else {
             console.log("currentData", currentData);
+            //check if the target clipInfos already exist in the currentData
+            var shouldGen = true;
+            currentData.forEach(function(data){
+              //console.log("data", data);
+              if (peeqPlayerHighlightVideo.clipInfosAreEqual(data.clipInfos, clipInfos)) {
+                console.log("clipInfos already exist for this playerHighlightVideos", clipInfos);
+                shouldGen = false;
+              }
+            });
+
+            if (shouldGen) {
+              //otherwise, add the target clipInfos to currentData
+              var newRecord = {
+                clipInfos: clipInfos,
+                state: 'init'
+              };
+              currentData.push(newRecord);
+              return currentData;
+            }
           }
           return;     //Abort the transaction
       });
-*/
-      return Promise.resolve(true);      //TODO: Check if highlight video with the same localSessions is available or being processing
+
+      //return Promise.resolve(true);      //TODO: Check if highlight video with the same localSessions is available or being processing
     }
     return Promise.reject("empty stats");
   };
 
+
   this.generateHighlightWithStatistics = function(stats) {
-    //console.log("generateHighlightWithLocalSessionIds", localSessionIds);
-
     return this.shouldGenerateHighlightWithStatistics(stats).then(function(value) {
-
-        console.log("shouldGenerateHighlightWithStatistics value", value);
-
-
-        if (value) {
-
-
+        //console.log("shouldGenerateHighlightWithStatistics value", value);
+        if ((value) && (value.committed)) {
 
           return Promise.resolve("TODO");
         }
@@ -211,6 +225,7 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
         }
     });
   };
+
 
   this.generateHighlightIfNeeded = function() {
     console.log("generateHighlightIfNeeded", this.id);
