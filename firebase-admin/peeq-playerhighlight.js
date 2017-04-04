@@ -149,7 +149,7 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
     var promises = [];
     obj.relatedLocalSessionSnapshots.forEach(function(localSessionSnapshot) {
       //console.log("localSessionSnapshot",localSessionSnapshot.key, localSessionSnapshot.val());
-      var prom = obj.fetchTrackerStatisticOfLocalSessionInTimeWindow(localSessionSnapshot, startPDate, endPDate);
+      var prom = peeqSensorRecord.fetchTrackerStatisticOfLocalSessionInTimeWindow(localSessionSnapshot, startPDate, endPDate, obj.val.players);
       promises.push(prom);
     });
     return Promise.all(promises);
@@ -172,6 +172,7 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
       //var refStr = "playerHighlightVideos/" + this.val.user + "/" + this.snapshot.key; //console.log("refStr", refStr);
       var ref = db.ref("playerHighlightVideos/" + this.val.user + "/" + this.snapshot.key);
 
+/*
       return ref.transaction(function(currentData) {
           if (currentData === null) {
             var newRecord = {0: {
@@ -185,8 +186,8 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
           }
           return;     //Abort the transaction
       });
-
-      //return Promise.resolve(true);      //TODO: Check if highlight video with the same localSessions is available or being processing
+*/
+      return Promise.resolve(true);      //TODO: Check if highlight video with the same localSessions is available or being processing
     }
     return Promise.reject("empty stats");
   };

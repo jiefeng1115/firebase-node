@@ -74,3 +74,66 @@ exports.calculateOverallStatisticFromStatisticArray = function(statisticArray) {
       });
     }
 };
+
+//return a promise of overallStat of the localSession
+exports.fetchTrackerStatisticOfLocalSessionInTimeWindow = function(localSessionSnapshot, startPDate, endPDate, players) {
+  //var obj = this;
+  var localSessionId = localSessionSnapshot.key;
+  console.log("fetchTrackerStatisticOfLocalSessionInTimeWindow localSessionId", localSessionId);
+
+  var db = admin.database();
+  var ref = db.ref("sensorRecords/" + localSessionId);
+
+  var trackerStat = {};
+
+  return ref.orderByChild("timestamp").startAt(startPDate.dateStr).endAt(endPDate.dateStr).once("value").then(function(filteredSnapshots) {
+      //console.log("sensorRecords filteredSnapshots", filteredSnapshots.val());
+
+      if (!trackerStat[localSessionId]) {
+        trackerStat[localSessionId] = {};
+      }
+
+      var snapshotsArray = peeqFirebase.snapshotsToArray(filteredSnapshots);
+      var targetPlayerIds = Object.keys(players);
+      console.log("filteredSnapshots", filteredSnapshots.numChildren(), "targetPlayerIds", targetPlayerIds);
+
+      var statisticArray = [];  //statistic array holder for generating the overall statistic
+
+      targetPlayerIds.forEach(function(targetPlayerId) {
+        console.log("targetPlayerId",targetPlayerId);
+        var filteredArray = snapshotsArray.filter(function(element) {
+          var playerId = element.val().player;
+          return (playerId == targetPlayerId);
+        });
+
+        if (filteredArray.length > 0) {
+          //console.log("filteredArray", filteredArray.length);
+          var statistic = peeqSensorRecord.calculateStatisticFromSnapshotArray(filteredArray);
+          //console.log("statistic", statistic);
+          statisticArray.push(statistic);
+          trackerStat[localSessionId][targetPlayerId] = statistic;
+        }
+      });
+
+      var overallStat = peeqSensorRecord.calculateOverallStatisticFromStatisticArray(statisticArray);
+      overallStat.localSession = localSessionId;
+      overallStat.highlightStartTime = startPDate.timeInterval;   //TODO: make the highlightStartTime and highlightEndTime dynamic
+      overallStat.highlightEndTime = endPDate.timeInterval;
+
+      //save trackerStat to firebase
+      if (overallStat.count > 0) {
+        var statRef = db.ref("trackerStatistics/");
+        statRef.set(trackerStat, function(error) {
+          if (error) {
+            console.error("Data could not be saved." + error);
+          }
+          //else {
+          //  console.log("Data saved successfully.");
+          //}
+        });
+        console.log("trackerStat", trackerStat);
+      }
+
+      return Promise.resolve(overallStat);      //return overallStat as promise
+  });
+};        //End of fetchTrackerStatisticOfLocalSessionInTimeWindow
