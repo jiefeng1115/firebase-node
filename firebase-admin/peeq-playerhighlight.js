@@ -88,6 +88,8 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
         var targetPlayerIds = Object.keys(obj.val.players);
         console.log("filteredSnapshots", filteredSnapshots.numChildren(), "targetPlayerIds", targetPlayerIds);
 
+        var statisticArray = [];
+
         targetPlayerIds.forEach(function(targetPlayerId) {
           console.log("targetPlayerId",targetPlayerId);
           var filteredArray = snapshotsArray.filter(function(element) {
@@ -99,6 +101,22 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
           //console.log("statistic", statistic);
 
           tracker[localSessionId][targetPlayerId] = statistic;
+
+          statisticArray.push(statistic);
+        });
+
+        var overall = peeqSensorRecord.calculateOverallStatisticFromStatisticArray(statisticArray);
+        tracker[localSessionId].overall = overall;
+
+        //save statistic to firebase
+        var statRef = db.ref("trackerStatistics/");
+        statRef.set(tracker, function(error) {
+          if (error) {
+            console.error("Data could not be saved." + error);
+          }
+          //else {
+          //  console.log("Data saved successfully.");
+          //}
         });
 
         console.log("tracker", tracker);
