@@ -66,7 +66,7 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
   };    //End of fetchRelatedLocalSessionSnapshots
 
 
-  //return a promise of the original obj, with obj.trackerStatistics[localSessionId][targetPlayerId] updated
+  //return a promise of overallStat of the localSession
   this.fetchTrackerStatisticOfLocalSessionInTimeWindow = function(localSessionSnapshot, startPDate, endPDate) {
     var obj = this;
     var localSessionId = localSessionSnapshot.key;
@@ -75,20 +75,20 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
     var db = admin.database();
     var ref = db.ref("sensorRecords/" + localSessionId);
 
-    var tracker = {};
+    var trackerStat = {};
 
     return ref.orderByChild("timestamp").startAt(startPDate.dateStr).endAt(endPDate.dateStr).once("value").then(function(filteredSnapshots) {
         //console.log("sensorRecords filteredSnapshots", filteredSnapshots.val());
 
-        if (!tracker[localSessionId]) {
-          tracker[localSessionId] = {};
+        if (!trackerStat[localSessionId]) {
+          trackerStat[localSessionId] = {};
         }
 
         var snapshotsArray = peeqFirebase.snapshotsToArray(filteredSnapshots);
         var targetPlayerIds = Object.keys(obj.val.players);
         console.log("filteredSnapshots", filteredSnapshots.numChildren(), "targetPlayerIds", targetPlayerIds);
 
-        var statisticArray = [];
+        var statisticArray = [];  //statistic array holder for generating the overall statistic
 
         targetPlayerIds.forEach(function(targetPlayerId) {
           console.log("targetPlayerId",targetPlayerId);
@@ -99,18 +99,17 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
           //console.log("filteredArray", filteredArray.length);
           var statistic = peeqSensorRecord.calculateStatisticFromSnapshotArray(filteredArray);
           //console.log("statistic", statistic);
-
-          tracker[localSessionId][targetPlayerId] = statistic;
-
           statisticArray.push(statistic);
+
+          trackerStat[localSessionId][targetPlayerId] = statistic;
         });
 
-        var overall = peeqSensorRecord.calculateOverallStatisticFromStatisticArray(statisticArray);
-        tracker[localSessionId].overall = overall;
+        var overallStat = peeqSensorRecord.calculateOverallStatisticFromStatisticArray(statisticArray);
+        overallStat.localSession = localSessionId;
 
-        //save statistic to firebase
+        //save trackerStat to firebase
         var statRef = db.ref("trackerStatistics/");
-        statRef.set(tracker, function(error) {
+        statRef.set(trackerStat, function(error) {
           if (error) {
             console.error("Data could not be saved." + error);
           }
@@ -118,9 +117,9 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
           //  console.log("Data saved successfully.");
           //}
         });
+        console.log("trackerStat", trackerStat);
 
-        console.log("tracker", tracker);
-        return Promise.resolve(tracker);
+        return Promise.resolve(overallStat);      //return overallStat as promise
     });
   };        //End of fetchTrackerStatisticOfLocalSessionInTimeWindow
 
@@ -138,10 +137,6 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
 
     var promises = [];
 
-    if (!obj.trackerStatistics) {
-      obj.trackerStatistics = {};
-    }
-
     obj.relatedLocalSessionSnapshots.forEach(function(localSessionSnapshot) {
       //console.log("localSessionSnapshot",localSessionSnapshot.key, localSessionSnapshot.val());
       var prom = obj.fetchTrackerStatisticOfLocalSessionInTimeWindow(localSessionSnapshot, startPDate, endPDate);
@@ -149,14 +144,14 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
     });
 
     return Promise.all(promises);
-  };
+  };    //end of generateTrackerStatisticIfNeeded
 
 
   this.generateHighlightIfNeeded = function() {
     console.log("generateHighlightIfNeeded", this.id);
     return this.fetchRelatedLocalSessionSnapshots().then(function(obj) {
-      return obj.generateTrackerStatisticIfNeeded().then(function(trackers) {
-          console.log("trackers", trackers);
+      return obj.generateTrackerStatisticIfNeeded().then(function(overallStats) {
+          console.log("overallStats", overallStats);
       });
     });
   };    //end of generateHighlightIfNeeded
