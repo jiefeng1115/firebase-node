@@ -4,6 +4,9 @@ var peeqDate = require("./peeq-date");
 var peeqSensorRecord = require("./peeq-sensorrecord");
 var firstBy = require('thenby');
 
+const highlightedPDateOffsetStart = -1000*15;
+const highlightedPDateOffsetEnd0 = 1000*5;
+
 exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
   this.id = id;
   if (snapshot) {
@@ -131,8 +134,8 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
     console.log("generateTrackerStatisticIfNeeded", obj.id);
 
     var highlightedPDate = new peeqDate.PDate(obj.val.timestamp);
-    var startPDate = highlightedPDate.PDateWithTimeOffset(-1000*15);    //10sec
-    var endPDate = highlightedPDate.PDateWithTimeOffset(1000*5);        //5sec
+    var startPDate = highlightedPDate.PDateWithTimeOffset(highlightedPDateOffsetStart);    //10sec
+    var endPDate = highlightedPDate.PDateWithTimeOffset(highlightedPDateOffsetEnd);        //5sec
 
     console.log("time window", startPDate.dateStr, endPDate.dateStr);
 
