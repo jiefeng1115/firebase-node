@@ -4,8 +4,9 @@ var peeqDate = require("./peeq-date");
 var peeqSensorRecord = require("./peeq-sensorrecord");
 var firstBy = require('thenby');
 
-const highlightedPDateOffsetStart = -1000*15;
-const highlightedPDateOffsetEnd0 = 1000*5;
+const highlightedPDateOffsetStart = -1000*15;       //TODO: Make this dynamic depends on the tracker data
+const highlightedPDateOffsetEnd = 1000*5;
+const generateHighlightDefaultNumOfVideos = 5;        //TODO: Make this dynamic depends on the tracker data
 
 exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
   this.id = id;
@@ -100,28 +101,34 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
             var playerId = element.val().player;
             return (playerId == targetPlayerId);
           });
-          //console.log("filteredArray", filteredArray.length);
-          var statistic = peeqSensorRecord.calculateStatisticFromSnapshotArray(filteredArray);
-          //console.log("statistic", statistic);
-          statisticArray.push(statistic);
 
-          trackerStat[localSessionId][targetPlayerId] = statistic;
+          if (filteredArray.length > 0) {
+            //console.log("filteredArray", filteredArray.length);
+            var statistic = peeqSensorRecord.calculateStatisticFromSnapshotArray(filteredArray);
+            //console.log("statistic", statistic);
+            statisticArray.push(statistic);
+            trackerStat[localSessionId][targetPlayerId] = statistic;
+          }
         });
 
         var overallStat = peeqSensorRecord.calculateOverallStatisticFromStatisticArray(statisticArray);
         overallStat.localSession = localSessionId;
+        overallStat.highlightStartTime = startPDate.timeInterval;   //TODO: make the highlightStartTime and highlightEndTime dynamic
+        overallStat.highlightEndTime = endPDate.timeInterval;
 
         //save trackerStat to firebase
-        var statRef = db.ref("trackerStatistics/");
-        statRef.set(trackerStat, function(error) {
-          if (error) {
-            console.error("Data could not be saved." + error);
-          }
-          //else {
-          //  console.log("Data saved successfully.");
-          //}
-        });
-        console.log("trackerStat", trackerStat);
+        if (overallStat.count > 0) {
+          var statRef = db.ref("trackerStatistics/");
+          statRef.set(trackerStat, function(error) {
+            if (error) {
+              console.error("Data could not be saved." + error);
+            }
+            //else {
+            //  console.log("Data saved successfully.");
+            //}
+          });
+          console.log("trackerStat", trackerStat);
+        }
 
         return Promise.resolve(overallStat);      //return overallStat as promise
     });
@@ -140,16 +147,69 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
     console.log("time window", startPDate.dateStr, endPDate.dateStr);
 
     var promises = [];
-
     obj.relatedLocalSessionSnapshots.forEach(function(localSessionSnapshot) {
       //console.log("localSessionSnapshot",localSessionSnapshot.key, localSessionSnapshot.val());
       var prom = obj.fetchTrackerStatisticOfLocalSessionInTimeWindow(localSessionSnapshot, startPDate, endPDate);
       promises.push(prom);
     });
-
     return Promise.all(promises);
   };    //end of generateTrackerStatisticIfNeeded
 
+  this.shouldGenerateHighlightWithStatistics = function(stats) {
+    //console.log("shouldGenerateHighlightWithLocalSessionIds", localSessionIds);
+    if (stats.length > 0) {
+      var clipInfos = stats.map(function(value) {
+        var clipInfo = {};
+        clipInfo.localSession = value.localSession;
+        clipInfo.startTime = value.highlightStartTime;
+        clipInfo.endTime = value.highlightEndTime;
+        return clipInfo;
+      });
+      console.log("clipInfos", clipInfos);
+
+      //try creating a new record to firebase playerHighlightVideos
+      var db = admin.database();
+      //var refStr = "playerHighlightVideos/" + this.val.user + "/" + this.snapshot.key; //console.log("refStr", refStr);
+      var ref = db.ref("playerHighlightVideos/" + this.val.user + "/" + this.snapshot.key);
+
+      return ref.transaction(function(currentData) {
+          if (currentData === null) {
+            var newRecord = {0: {
+              clipInfos: clipInfos,
+              state: 'init'
+            }};
+            return newRecord;
+          }
+          else {
+            console.log("currentData", currentData);
+          }
+          return;     //Abort the transaction
+      });
+
+      //return Promise.resolve(true);      //TODO: Check if highlight video with the same localSessions is available or being processing
+    }
+    return Promise.reject("empty stats");
+  };
+
+  this.generateHighlightWithStatistics = function(stats) {
+    //console.log("generateHighlightWithLocalSessionIds", localSessionIds);
+
+    return this.shouldGenerateHighlightWithStatistics(stats).then(function(value) {
+
+        console.log("shouldGenerateHighlightWithStatistics value", value);
+
+
+        if (value) {
+
+
+
+          return Promise.resolve("TODO");
+        }
+        else {
+          return Promise.reject("should not generate");
+        }
+    });
+  };
 
   this.generateHighlightIfNeeded = function() {
     console.log("generateHighlightIfNeeded", this.id);
@@ -157,13 +217,19 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
       return obj.generateTrackerStatisticIfNeeded().then(function(overallStats) {
           console.log("overallStats", overallStats);
 
-          var overallStatsSorted = overallStats.sort(
+          var overallStatsSorted = overallStats.filter(function(value){ return (value.count > 0) })
+          .sort(
             firstBy(function (v1,v2) { return Math.abs(v1.min) - Math.abs(v2.min) })      //proximity
+            .thenBy(function (v1,v2) { return v2.numOfPlayers - v1.numOfPlayers })        //num of highlighted players detected
             .thenBy(function (v1,v2) { return v2.duration - v1.duration })                //coverage
           );
-
-          console.log("overallStats2", overallStats);
           console.log("overallStatsSorted", overallStatsSorted);
+
+          var selectedStats = overallStatsSorted.slice(0, generateHighlightDefaultNumOfVideos);
+          return obj.generateHighlightWithStatistics(selectedStats).then(function(value) {
+            console.log("value", value);
+            return Promise.resolve("TODO");
+          });
       });
     });
   };    //end of generateHighlightIfNeeded

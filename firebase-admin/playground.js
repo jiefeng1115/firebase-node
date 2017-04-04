@@ -76,6 +76,8 @@ playerHighlight.fetchRelatedLocalSessionSnapshots().then(function(relatedSnapsho
 */
 playerHighlight.generateHighlightIfNeeded().then(function(value) {
   console.log("value", value);
+}, function(err) {
+  console.error("err", err);
 });
 
 //GeoPoint =============================
