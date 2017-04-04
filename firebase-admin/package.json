@@ -11,6 +11,7 @@
   "dependencies": {
     "@google-cloud/datastore": "^0.7.1",
     "firebase-admin": "^4.1.4",
-    "geopoint": "^1.0.1"
+    "geopoint": "^1.0.1",
+    "thenby": "^1.2.3"
   }
 }

@@ -2,6 +2,7 @@ var peeqFirebase = require("./peeq-firebase");
 var admin = peeqFirebase.admin;
 var peeqDate = require("./peeq-date");
 var peeqSensorRecord = require("./peeq-sensorrecord");
+var firstBy = require('thenby');
 
 exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
   this.id = id;
@@ -152,6 +153,14 @@ exports.PlayerHighlight = function PlayerHighlight (id, snapshot) {
     return this.fetchRelatedLocalSessionSnapshots().then(function(obj) {
       return obj.generateTrackerStatisticIfNeeded().then(function(overallStats) {
           console.log("overallStats", overallStats);
+
+          var overallStatsSorted = overallStats.sort(
+            firstBy(function (v1,v2) { return Math.abs(v1.min) - Math.abs(v2.min) })      //proximity
+            .thenBy(function (v1,v2) { return v2.duration - v1.duration })                //coverage
+          );
+
+          console.log("overallStats2", overallStats);
+          console.log("overallStatsSorted", overallStatsSorted);
       });
     });
   };    //end of generateHighlightIfNeeded
