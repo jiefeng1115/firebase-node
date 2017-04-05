@@ -247,8 +247,8 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
                 var adjustedStartTime = (clipInfo.startTime > videoStartTime) ? clipInfo.startTime : videoStartTime;
                 var adjustedEndTime = (clipInfo.endTime < videoEndTime) ? clipInfo.endTime : videoEndTime;
 
-                var highlightStartInVideoOffset = adjustedStartTime - videoStartTime; //in milli sec
-                var highlightDurationInVideo = adjustedEndTime - adjustedStartTime; //in milli sec
+                var highlightStartInVideoOffset = (adjustedStartTime - videoStartTime) / 1000; //in sec
+                var highlightDurationInVideo = (adjustedEndTime - adjustedStartTime) / 1000; //in sec
 
                 console.log("highlightStartInVideoOffset", highlightStartInVideoOffset, "highlightDurationInVideo", highlightDurationInVideo);
 
