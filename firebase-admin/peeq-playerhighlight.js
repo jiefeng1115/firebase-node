@@ -9,13 +9,14 @@ const highlightedPDateOffsetStart = -1000 * 15; //TODO: Make this dynamic depend
 const highlightedPDateOffsetEnd = 1000 * 5;
 const generateHighlightDefaultNumOfVideos = 5; //TODO: Make this dynamic depends on the tracker data
 
+//PlayerHighlight class
 exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
     this.id = id;
     if (snapshot) {
         this.snapshot = snapshot;
     }
 
-    //return a promise of the original obj, with snapshot assigned to obj.snapshot
+    //return a promise of the original obj, with snapshot assigned to obj.snapshot + obj.val
     this.fetchSnapshot = function() {
         var obj = this;
         return peeqFirebase.snapshotOf("playerHighlights/" + obj.id).then(function(snapshot) {
@@ -190,7 +191,7 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
                         //console.log("data", data);
                         if (peeqPlayerHighlightVideo.clipInfosAreEqual(data.clipInfos, clipInfos)) {
                             console.log("clipInfos already exist for this playerHighlightVideos", clipInfos);
-                            shouldGen = false;
+                            //!!! shouldGen = false;        //FIXME: commentted out for testing, restore this line for production
                         }
                     });
 
@@ -200,7 +201,7 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
                             clipInfos: clipInfos,
                             state: 'init'
                         };
-                        currentData.push(record);
+                        //!!! currentData.push(record);     //FIXME: commentted out for testing, restore this line for production
                         return currentData;
                     }
                 }
@@ -212,18 +213,89 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
         return Promise.reject("empty stats");
     };
 
+    this.generateVideoClipWithInfo = function(clipInfo) {
+        //var obj = this;
+        console.log("generateVideoClipWithInfo", clipInfo);
 
-    this.generateHighlightWithStatistics = function(stats) {
-        return this.shouldGenerateHighlightWithStatistics(stats).then(function(value) {
-            //console.log("shouldGenerateHighlightWithStatistics value", value);
-            if ((value) && (value.committed)) {
+        var db = admin.database();
+        var ref = db.ref("videos/" + clipInfo.localSession);
+
+        //TODO: Adapt for multiple videos in a localSession if needed
+        //For now, there should be only one video record in ref
+        return ref.once("value").then(function(snapshot) {
+            if ((snapshot) && (snapshot.exists()) && (snapshot.numChildren() > 0)) {
+                //var child = snapshot.child();
+                var parentVal = snapshot.val();
+                var videoId = Object.keys(parentVal)[0];
+                var val = parentVal[videoId];
+
+                var videoStartDate = new peeqDate.PDate(val.startDate);
+                var videoEndDate = new peeqDate.PDate(val.endDate);
+                var videoStartTime = videoStartDate.timeInterval;
+                var videoEndTime = videoEndDate.timeInterval;
+                console.log("val", val, "videoStartTime", videoStartTime, "videoEndTime", videoEndTime);
+
+                //TODO: handle case where video end time was not saved properly
+
+                if (clipInfo.startTime > videoEndTime) {
+                    return Promise.reject("video time window out of range: clipInfo.startTime " + clipInfo.startTime + " videoEndTime " + videoEndTime);
+                }
+                if (clipInfo.endTime < videoStartTime) {
+                    return Promise.reject("video time window out of range: clipInfo.endTime " + clipInfo.endTime + " videoStartTime " + videoStartTime);
+                }
+
+                var adjustedStartTime = (clipInfo.startTime > videoStartTime) ? clipInfo.startTime : videoStartTime;
+                var adjustedEndTime = (clipInfo.endTime < videoEndTime) ? clipInfo.endTime : videoEndTime;
+
+                var highlightStartInVideoOffset = adjustedStartTime - videoStartTime; //in milli sec
+                var highlightDurationInVideo = adjustedEndTime - adjustedStartTime; //in milli sec
+
+                console.log("highlightStartInVideoOffset", highlightStartInVideoOffset, "highlightDurationInVideo", highlightDurationInVideo);
 
                 return Promise.resolve("TODO");
+            } else {
+                return Promise.reject("invalid video " + clipInfo.localSession);
+            }
+        });
+
+    };
+
+    this.generateHighlightWithPlayerHighlightVideoSnapshot = function(playerHighlightVideoSnapshot) {
+        var obj = this;
+
+        var val = playerHighlightVideoSnapshot.val();
+        console.log("playerHighlightVideoSnapshot", val);
+
+        var promises = [];
+        val.clipInfos.forEach(function(clipInfo) {
+            var prom = obj.generateVideoClipWithInfo(clipInfo);
+            promises.push(prom);
+        });
+
+        return Promise.all(promises).then(function(value) {
+            console.log("value", value);
+            return Promise.resolve("TODO");
+        });
+
+    }; //end of generateHighlightWithPlayerHighlightVideo
+
+    this.generateHighlightWithStatistics = function(stats) {
+        var obj = this;
+        return this.shouldGenerateHighlightWithStatistics(stats).then(function(transactionResult) {
+            //console.log("shouldGenerateHighlightWithStatistics transactionResult", transactionResult);
+            if ((transactionResult) && (transactionResult.committed)) {
+                var playerHighlightVideosSnapshot = transactionResult.snapshot;
+                if (playerHighlightVideosSnapshot.numChildren() > 0) {
+                    obj.playerHighlightVideoSnapshot = playerHighlightVideosSnapshot.child(playerHighlightVideosSnapshot.numChildren() - 1); //get the last element, which is the new highlight video to be generated
+                    return obj.generateHighlightWithPlayerHighlightVideoSnapshot(obj.playerHighlightVideoSnapshot);
+                } else {
+                    return Promise.reject("invalid playerHighlightVideosSnapshot");
+                }
             } else {
                 return Promise.reject("should not generate");
             }
         });
-    };
+    }; //end of generateHighlightWithStatistics
 
 
     this.generateHighlightIfNeeded = function() {
