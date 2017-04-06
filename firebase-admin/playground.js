@@ -74,11 +74,13 @@ playerHighlight.fetchRelatedLocalSessionSnapshots().then(function(relatedSnapsho
   console.error(err);
 });
 */
+/*
 playerHighlight.generateHighlightIfNeeded().then(function(value) {
-  console.log("value", value);
+    console.log("value", value);
 }, function(err) {
-  console.error("err", err);
+    console.error("err", err);
 });
+*/
 
 //GeoPoint =============================
 /*
@@ -96,3 +98,17 @@ peeqGlobalSession.createIfNeededWith(testLocalSessionId).then(function(obj) {
   console.error("reject", err);
 });
 */
+
+//VideoClip ====================
+/*
+var peeqVideoClip = require("./peeq-videoclip");
+peeqVideoClip.testCreateObjsInFirebaseIfNeeded().then(function(value) {
+    console.log("value", value);
+});
+*/
+
+//PlayerHighlightVideo =================
+var peeqPlayerHighlightVideo = require("./peeq-playerhighlightvideo");
+peeqPlayerHighlightVideo.testCreateObjInFirebaseIfNeeded().then(function(value) {
+    console.log("value", value);
+});

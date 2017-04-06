@@ -12,6 +12,7 @@
     "@google-cloud/datastore": "^0.7.1",
     "firebase-admin": "^4.1.4",
     "geopoint": "^1.0.1",
+    "jshint": "^2.9.4",
     "thenby": "^1.2.3"
   }
 }
