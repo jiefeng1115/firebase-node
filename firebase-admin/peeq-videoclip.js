@@ -1,6 +1,7 @@
 var peeqFirebase = require("./peeq-firebase");
 var admin = peeqFirebase.admin;
 var peeqDate = require("./peeq-date");
+var peeqPubSub = require("./peeq-pubsub");
 
 exports.objsAreEqual = function(v1, v2) {
     return ((v1.startTime == v2.startTime) && (v1.endTime == v2.endTime) && (v1.localSession == v2.localSession));
@@ -94,7 +95,7 @@ exports.VideoClip = function VideoClip(id, snapshot) {
     };
 
 
-
+    //return a promise of the new transcodeTask firebase Id
     this.generateTranscodeTask = function() {
         var obj = this;
         var db = admin.database();
@@ -132,7 +133,24 @@ exports.VideoClip = function VideoClip(id, snapshot) {
 
                 console.log("highlightStartInVideoOffset", highlightStartInVideoOffset, "highlightDurationInVideo", highlightDurationInVideo);
 
-                return Promise.resolve("TODO");
+                //create transcodeTask in Firebase
+                var newObj = {};
+                newObj.state = "init";
+                newObj.updatedAt = new Date().getTime();
+                newObj.type = "cutVideoClip";
+                newObj.parameters = []; //FIXME: missing parameters
+                newObj.videoClip = obj.id;
+
+                var db = admin.database();
+                var ref = db.ref("transcodeTasks");
+                var newObjRef = ref.push();
+                return newObjRef.set(newObj).then(function() {
+                    newObj.transcodeTask = newObjRef.key;
+                    //publish task to pubsub
+                    return peeqPubSub.publishMessage("onTranscodeTaskCreated", newObj).then(function(value) {
+                        return Promise.resolve(newObjRef.key);
+                    });
+                });
             } else {
                 return Promise.reject("video not found with localSession id" + obj.val.localSession);
             }
