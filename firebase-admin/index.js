@@ -13,6 +13,7 @@ console.log("toISOString", date.toISOString());
 
 var testLocalSessionId = "-KgpXL4n705tBzMeuKOy";
 var testPlayerHighlightId = "-KgpXeHkTxyS3C7LgRK-";
+var testPlayerHighlightVideoId = '-Kh4X8AuFGJYqwg2UF9z';
 
 //LocationRecord ============================
 var peeqLocationRecord = require("./peeq-locationrecord");
@@ -74,11 +75,13 @@ playerHighlight.fetchRelatedLocalSessionSnapshots().then(function(relatedSnapsho
   console.error(err);
 });
 */
+/*
 playerHighlight.generateHighlightIfNeeded().then(function(value) {
-  console.log("value", value);
+    console.log("value", value);
 }, function(err) {
-  console.error("err", err);
+    console.error("err", err);
 });
+*/
 
 //GeoPoint =============================
 /*
@@ -96,3 +99,12 @@ peeqGlobalSession.createIfNeededWith(testLocalSessionId).then(function(obj) {
   console.error("reject", err);
 });
 */
+
+//PlayerHighlightVideo ==================
+var peeqPlayerHighlightVideo = require("./peeq-playerhighlightVideo");
+var playerHighlightVideo = new peeqPlayerHighlightVideo.PlayerHighlightVideo(testPlayerHighlightVideoId);
+playerHighlightVideo.generateVideo().then(function(value) {
+    console.log("value", value);
+}, function(err) {
+    console.error("err", err);
+});
