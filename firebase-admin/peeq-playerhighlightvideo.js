@@ -4,9 +4,9 @@ var peeqVideoClip = require("./peeq-videoclip");
 
 exports.objsAreEqual = function(v1, v2) {
     //console.log("objsAreEqual", v1, v2);
-    if (v1.videoClips.length != v2.videoClips.length) { return false }
+    if (v1.videoClips.length != v2.videoClips.length) { return false; }
     for (var i = 0; i < v1.videoClips.length; i++) {
-        if (v1.videoClips[i] != v2.videoClips[i]) { return false }
+        if (v1.videoClips[i] != v2.videoClips[i]) { return false; }
     }
     return true;
 };
@@ -99,6 +99,9 @@ exports.PlayerHighlightVideo = function PlayerHighlightVideo(id, snapshot) {
                 var promises = [];
                 obj.val.videoClips.forEach(function(videoClipId) {
                     var videoClipObj = new peeqVideoClip.VideoClip(videoClipId);
+
+                    videoClip.addPlayerHighlightVideo(obj.id);
+
                     var prom = videoClipObj.generateClip();
                     promises.push(prom);
                 });

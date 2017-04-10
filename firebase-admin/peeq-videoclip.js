@@ -55,7 +55,7 @@ this.createObjsInFirebaseIfNeeded = function(videoClips) {
 };
 
 exports.dummyVideoClip = function() {
-    var videoClip = {}
+    var videoClip = {};
     videoClip.startTime = 123;
     videoClip.endTime = 456;
     videoClip.localSession = 123456;
@@ -104,6 +104,7 @@ exports.VideoClip = function VideoClip(id, snapshot) {
         //TODO: Adapt for multiple videos in a localSession if needed
         //For now, there should be only one video record in ref
         return ref.once("value").then(function(snapshot) {
+            //video record snapshot
             if ((snapshot) && (snapshot.exists()) && (snapshot.numChildren() > 0)) {
                 //var child = snapshot.child();
                 var parentVal = snapshot.val();
@@ -138,7 +139,11 @@ exports.VideoClip = function VideoClip(id, snapshot) {
                 newObj.state = "init";
                 newObj.updatedAt = new Date().getTime();
                 newObj.type = "cutVideoClip";
-                newObj.parameters = []; //FIXME: missing parameters
+                newObj.parameters = {};
+                newObj.parameters.highlightStartInVideoOffset = highlightStartInVideoOffset;
+                newObj.parameters.highlightDurationInVideo = highlightDurationInVideo;
+                newObj.parameters.sourceFile = val.storage; //i.e. "peeq-videos/videos/-Kh8zowt8ZvWhrRTGu96/-Kh8zrdjXQL-nXFGfFSK/raw_2017-04-07T19:58:51.549Z.mov"
+
                 newObj.videoClip = obj.id;
 
                 var db = admin.database();
@@ -160,7 +165,6 @@ exports.VideoClip = function VideoClip(id, snapshot) {
     }; //end of generateTranscodeTask
 
 
-
     //return a promise of the clip url
     this.generateClip = function() {
         var obj = this;
@@ -179,5 +183,15 @@ exports.VideoClip = function VideoClip(id, snapshot) {
             }
         });
     }; //end of generateClip
+
+    //return a promise of the playerHighlightVideoId
+    this.addPlayerHighlightVideo = function(playerHighlightVideoId) {
+        //var obj = this;
+        var db = admin.database();
+        var ref = db.ref("videoClips").child(this.id).child("playerHighlightVideos").child(playerHighlightVideoId);
+        return ref.set(true).then(function() {
+            return Promise.resolve(playerHighlightVideoId);
+        });
+    }; //end of addPlayerHighlightVideo
 
 }; //end of VideoClip class
