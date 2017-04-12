@@ -107,8 +107,11 @@ peeqVideoClip.testCreateObjsInFirebaseIfNeeded().then(function(value) {
 });
 */
 
-//PlayerHighlightVideo =================
-var peeqPlayerHighlightVideo = require("./peeq-playerhighlightvideo");
-peeqPlayerHighlightVideo.testCreateObjInFirebaseIfNeeded().then(function(value) {
+//PlayerHighlightVideo ==================
+var peeqPlayerHighlightVideo = require("./peeq-playerhighlightVideo");
+var playerHighlightVideo = new peeqPlayerHighlightVideo.PlayerHighlightVideo(testPlayerHighlightVideoId);
+playerHighlightVideo.generateVideo().then(function(value) {
     console.log("value", value);
+}, function(err) {
+    console.error("err", err);
 });

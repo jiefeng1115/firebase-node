@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 const functions = require('firebase-functions');
 
 const admin = require('firebase-admin');
@@ -7,11 +9,11 @@ admin.initializeApp(functions.config().firebase);
 // Listens for new object added to /localSessions/:localSessionId/startDate
 exports.onLocalSessionStarted = functions.database.ref('/localSessions/{localSessionId}/startDate')
     .onWrite(event => {
-      // Grab the current value of what was written to the Realtime Database.
-      console.log('onLocalSessionStarted event', event);
-      //const original = event.data.val();
-      //console.log('onLocalSessionStarted', event.params.localSessionId, original);
-      return null;
+        // Grab the current value of what was written to the Realtime Database.
+        console.log('onLocalSessionStarted event', event);
+        //const original = event.data.val();
+        //console.log('onLocalSessionStarted', event.params.localSessionId, original);
+        return null;
     });
 
 
@@ -21,3 +23,9 @@ exports.onLocalSessionStarted = functions.database.ref('/localSessions/{localSes
 // exports.helloWorld = functions.https.onRequest((request, response) => {
 //  response.send("Hello from Firebase!");
 // })
+
+exports.onVideoStorage = functions.database.ref('/videos/{localSessionId}/{videoId}/storage').onWrite(event => {
+    console.log("onVideoStorage event", event);
+
+    return null;
+});
