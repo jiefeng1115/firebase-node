@@ -1,34 +1,30 @@
-/*
-//return new date str with time offset from the base date str
-exports.dateStrWithTimeOffset = function(baseDateStr, offset) { //offset in millisec
-  var newDate = new Date(baseDateStr);
-  newDate.setTime(newDate.getTime() + offset);
-  return newDate.toISOString();
-};
-*/
+/*jshint esversion: 6 */
 
-exports.PDate = function PDate (dateStr) {
-  this.dateStr = dateStr;
-  this.date = new Date(dateStr);
-  this.timeInterval = this.date.getTime();
+exports.milliSecToMinute = 60000;
+exports.milliSecToHour = 3600000;
 
-  //return new date str with time offset
-  this.dateStrWithTimeOffset = function(offset) { //offset in millisec
-    var dummyDate = new Date(this.dateStr);
-    dummyDate.setTime(dummyDate.getTime() + offset);
-    return dummyDate.toISOString();
-  };
+exports.PDate = function PDate(dateStr) {
+    this.dateStr = dateStr;
+    this.date = new Date(dateStr);
+    this.timeInterval = this.date.getTime();
 
-  //return new PDate obj with time offset
-  this.PDateWithTimeOffset = function(offset) { //offset in millisec
-    return new PDate(this.dateStrWithTimeOffset(offset));
-  };
+    //return new date str with time offset (in millisec)
+    this.dateStrWithTimeOffset = function(offset) { //offset in millisec
+        var dummyDate = new Date(this.dateStr);
+        dummyDate.setTime(dummyDate.getTime() + offset);
+        return dummyDate.toISOString();
+    };
 
-  //return timeInterval in millisec
-  //+ve time interval represent dateStr is larger then this.date
-  //-ve time interval represent dateStr is smaller then this.date
-  this.timeIntervalToDateStr = function(dateStr) {
-    var dummyDate = new Date(dateStr);
-    return (this.timeInterval - dummyDate.getTime());
-  };
+    //return new PDate obj with time offset
+    this.PDateWithTimeOffset = function(offset) { //offset in millisec
+        return new PDate(this.dateStrWithTimeOffset(offset));
+    };
+
+    //return timeInterval in millisec
+    //+ve time interval represent dateStr is larger then this.date
+    //-ve time interval represent dateStr is smaller then this.date
+    this.timeIntervalToDateStr = function(dateStr) {
+        var dummyDate = new Date(dateStr);
+        return (this.timeInterval - dummyDate.getTime());
+    };
 };

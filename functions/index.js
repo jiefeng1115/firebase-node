@@ -16,16 +16,10 @@ exports.onLocalSessionStarted = functions.database.ref('/localSessions/{localSes
         return null;
     });
 
-
-// // Start writing Firebase Functions
-// // https://firebase.google.com/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// })
-
 exports.onVideoStorage = functions.database.ref('/videos/{localSessionId}/{videoId}/storage').onWrite(event => {
     console.log("onVideoStorage event", event);
+
+    //check if all related video (localSession) are uploaded, or the system had been waiting too long
 
     return null;
 });

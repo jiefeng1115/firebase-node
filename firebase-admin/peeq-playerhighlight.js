@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 var peeqFirebase = require("./peeq-firebase");
 var admin = peeqFirebase.admin;
 
