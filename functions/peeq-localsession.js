@@ -34,7 +34,8 @@ exports.LocalSession = function LocalSession(id, snapshot) {
 
 
 
-    //fetch related localSessionSnapshots started within 0.5 hr before or 0.5 hr after this localSession
+    //fetch related localSessionSnapshots started within relatedLocalSessionsStartDataTimeOffsetStartAt before or after this localSession's startDate
+    //return a promise of localSessionSnapshots
     this.fetchRelatedLocalSessionSnapshots = function() {
         return this.fetchSnapshotIfNeeded().then(function(obj) {
             var val = obj.val;
@@ -50,7 +51,7 @@ exports.LocalSession = function LocalSession(id, snapshot) {
                 var relatedSnapshots = [];
                 filteredSnapshots.forEach(function(childSnapshot) {
                     //console.log("childSnapshot", childSnapshot.val());
-                    if (peeqFirebase.isRelated(obj.snapshot, childSnapshot)) {
+                    if ((childSnapshot.key != obj.snapshot.key) && (peeqFirebase.isRelated(obj.snapshot, childSnapshot))) {
                         relatedSnapshots.push(childSnapshot);
                         //console.log("relatedSnapshots", relatedSnapshots);
                     }
