@@ -25,6 +25,11 @@ exports.PDate = function PDate(dateStr) {
     //-ve time interval represent dateStr is smaller then this.date
     this.timeIntervalToDateStr = function(dateStr) {
         var dummyDate = new Date(dateStr);
-        return (this.timeInterval - dummyDate.getTime());
+        return (dummyDate.getTime() - this.timeInterval);
+    };
+
+    this.timeIntervalToNow = function() {
+        var dummyDate = new Date();
+        return (dummyDate.getTime() - this.timeInterval);
     };
 };

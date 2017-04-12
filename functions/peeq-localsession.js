@@ -6,6 +6,7 @@ var peeqDate = require("./peeq-date");
 
 const relatedLocalSessionsStartDataTimeOffsetStartAt = -peeqDate.milliSecToMinute * 30; //30 min before
 const relatedLocalSessionsStartDataTimeOffsetEndAt = peeqDate.milliSecToMinute * 30; //30 min after
+const isReadyForProcessingPlayerHighlightsThresholdEndDateToNow = peeqDate.milliSecToHour; //1 hr before now
 
 exports.LocalSession = function LocalSession(id, snapshot) {
     this.id = id;
@@ -31,7 +32,6 @@ exports.LocalSession = function LocalSession(id, snapshot) {
     this.fetchSnapshotIfNeeded = function() {
         return (this.snapshot ? Promise.resolve(this) : this.fetchSnapshot());
     };
-
 
 
     //fetch related localSessionSnapshots started within relatedLocalSessionsStartDataTimeOffsetStartAt before or after this localSession's startDate
@@ -61,6 +61,62 @@ exports.LocalSession = function LocalSession(id, snapshot) {
             }); //end of orderByChild
         });
     }; //end of fetchRelatedLocalSessionSnapshots
+
+
+    //return a promose of video snapshots or [] for no video
+    this.fetchVideoSnapshots = function() {
+        return peeqFirebase.snapshotOf("videos/" + this.id).then((snapshot) => {
+            var childSnapshots = [];
+            if ((snapshot) && (snapshot.exists())) {
+                snapshot.forEach((childSnapshot) => {
+                    childSnapshots.push(childSnapshot);
+                });
+            }
+            return Promise.resolve(childSnapshots);
+        });
+    }; //end of fetchVideoSnapshots
+
+
+    //return a promise of bool, stating if the associated raw video had been uploaded
+    this.isRawVideoUploaded = function() {
+        return this.fetchVideoSnapshots().then((snapshots) => {
+            if (snapshots.length > 0) {
+                var snapshot = snapshots[0];
+                return (snapshot.val().storage) ? Promise.resolve(true) : Promise.resolve(false);
+            }
+            return Promise.resolve(false);
+        });
+    }; //end of isRawVideoUploaded
+
+
+    //check if all related video (localSession) are uploaded, or the system had been waiting too long
+    //return a promise of bool, stating if it is ready to be process for the player highlights
+    this.isReadyForProcessingPlayerHighlights = function() {
+        return this.fetchSnapshotIfNeeded().then(function(obj) {
+            if (obj.endDate) {
+                var endPDate = new peeqDate.PDate(obj.endDate);
+                if (endPDate.timeIntervalToNow() > isReadyForProcessingPlayerHighlightsThresholdEndDateToNow) {
+                    return Promise.resolve(true);
+                }
+            }
+
+            return obj.fetchRelatedLocalSessionSnapshots().then((relatedSnapshots) => {
+                if (relatedSnapshots.length > 0) {
+                    var isReadyPromises = [];
+                    relatedSnapshots.forEach((snapshot) => {
+                        var dummyLocalSession = new LocalSession(snapshot.key);
+                        isReadyPromises.push(dummyLocalSession.isRawVideoUploaded());
+                    });
+                    return Promise.all(isReadyPromises).then((results) => {
+                        return Promise.resolve(true);
+                    });
+                } else {
+                    //no related localSession
+                    return Promise.resolve(true);
+                }
+            });
+        });
+    }; //end of isReadyForProcessingPlayerHighlights
 
 
 
