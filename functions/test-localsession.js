@@ -28,8 +28,19 @@ localSession.fetchVideoSnapshots().then((result) => {
 });
 */
 
+/*
 localSession.isReadyForProcessingPlayerHighlights().then((result) => {
     console.log("result", result);
+}).catch((err) => {
+    console.error(err);
+});
+*/
+
+localSession.fetchRelatedPlayerHighlightSnapshots().then((result) => {
+    console.log("result length", result.length);
+    result.forEach((snapshot) => {
+        console.log(snapshot.val());
+    });
 }).catch((err) => {
     console.error(err);
 });

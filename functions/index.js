@@ -2,8 +2,11 @@
 
 const functions = require('firebase-functions');
 
-const admin = require('firebase-admin');
-admin.initializeApp(functions.config().firebase);
+//const admin = require('firebase-admin');
+//admin.initializeApp(functions.config().firebase);
+
+var peeqLocalSession = require("./peeq-localsession");
+var peeqPlayerHighlight = require("./peeq-playerhighlight");
 
 //N.B. if listen for the localSessions directly, multiple event will be generated per update.
 // Listens for new object added to /localSessions/:localSessionId/startDate
@@ -14,12 +17,27 @@ exports.onLocalSessionStarted = functions.database.ref('/localSessions/{localSes
         //const original = event.data.val();
         //console.log('onLocalSessionStarted', event.params.localSessionId, original);
         return null;
-    });
+    }); //end of onLocalSessionStarted
 
 exports.onVideoStorage = functions.database.ref('/videos/{localSessionId}/{videoId}/storage').onWrite(event => {
     console.log("onVideoStorage event", event);
 
-    //check if all related video (localSession) are uploaded, or the system had been waiting too long
+    var localSessionId = event.params.localSessionId;
+    var videoId = event.params.videoId;
+    var localSession = new peeqLocalSession.LocalSession(localSessionId);
 
-    return null;
-});
+    return localSession.isReadyForProcessingPlayerHighlights().then((isReady) => {
+        if (isReady) {
+            localSession.fetchRelatedPlayerHighlightSnapshots().then((playerHighlightSnapshots) => {
+                console.log("playerHighlightSnapshots length", playerHighlightSnapshots.length);
+                var generatePlayerHighlightPromises = [];
+                playerHighlightSnapshots.forEach((playerHighlightSnapshot) => {
+                    var dummyPlayerHighlight = new peeqPlayerHighlight.PlayerHighlight(playerHighlightSnapshot.key);
+                    generatePlayerHighlightPromises.push(dummyPlayerHighlight.generateHighlightIfNeeded());
+                });
+                return Promise.all(generatePlayerHighlightPromises);
+            }); //end of fetchRelatedPlayerHighlightSnapshots
+        }
+        return null;
+    }); //end of isReadyForProcessingPlayerHighlights
+}); //end of onVideoStorage

@@ -7,7 +7,6 @@ exports.objsAreEqual = function(v1, v2) {
     return ((v1.startTime == v2.startTime) && (v1.endTime == v2.endTime) && (v1.localSession == v2.localSession));
 };
 
-//TODO: FIREBASE WARNING: Using an unspecified index. Consider adding ".indexOn": "localSession" at /videoClips to your security rules for better performance 
 //return a promise of results {id, isNew}
 exports.createObjInFirebaseIfNeeded = function(videoClip) {
     var db = admin.database();

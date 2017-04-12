@@ -161,7 +161,7 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
     }; //end of generateTrackerStatisticIfNeeded
 
 
-    //return a promise of the playerHighlightVideo url
+    //return a promise of the playerHighlightVideo storage or [clipStorage / transcodeTaskId]
     this.generateHighlightWithStatistics = function(stats) {
         var obj = this;
 
@@ -196,7 +196,7 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
     }; //end of generateHighlightWithStatistics
 
 
-    //return a promise of the playerHighlightVideo url
+    //return a promise of the playerHighlightVideo video storage or [clipStorage / transcodeTaskId]
     this.generateHighlightIfNeeded = function() {
         console.log("generateHighlightIfNeeded", this.id);
         return this.fetchRelatedLocalSessionSnapshots().then(function(obj) {

@@ -85,7 +85,7 @@ exports.PlayerHighlightVideo = function PlayerHighlightVideo(id, snapshot) {
         return (this.snapshot ? Promise.resolve(this.snapshot) : this.fetchSnapshot());
     };
 
-    //return a promise of the video url
+    //return a promise of the video storage or [clipStorage / transcodeTaskId]
     this.generateVideo = function() {
         var obj = this;
         return obj.fetchSnapshotIfNeeded().then(function(snapshot) {
@@ -93,8 +93,8 @@ exports.PlayerHighlightVideo = function PlayerHighlightVideo(id, snapshot) {
             obj.val = snapshot.val();
             console.log("playerHighlightVideo", obj.val);
 
-            if (obj.val.url) {
-                return Promise.resolve(obj.val.url); //video already exist
+            if (obj.val.storage) {
+                return Promise.resolve(obj.val.storage); //video already exist
             } else {
                 var promises = [];
                 obj.val.videoClips.forEach(function(videoClipId) {
@@ -106,11 +106,10 @@ exports.PlayerHighlightVideo = function PlayerHighlightVideo(id, snapshot) {
                     promises.push(prom);
                 });
 
-                return Promise.all(promises).then(function(value) {
-                    //TODO: combine the clips to form the highlight video
-
-                    console.log("value", value);
-                    return Promise.resolve("TODO");
+                //values are the clip storage or transcodeTaskId
+                return Promise.all(promises).then(function(clipStoragesOrTranscodeTaskIds) {
+                    console.log("clipStoragesOrTranscodeTaskIds", clipStoragesOrTranscodeTaskIds);
+                    return Promise.resolve(clipStoragesOrTranscodeTaskIds);
                 });
             }
         });

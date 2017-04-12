@@ -7,7 +7,6 @@ exports.objsAreEqual = function(v1, v2) {
     return ((v1.startTime == v2.startTime) && (v1.endTime == v2.endTime) && (v1.localSession == v2.localSession));
 };
 
-//TODO: FIREBASE WARNING: Using an unspecified index. Consider adding ".indexOn": "localSession" at /videoClips to your security rules for better performance 
 //return a promise of results {id, isNew}
 exports.createObjInFirebaseIfNeeded = function(videoClip) {
     var db = admin.database();
@@ -95,7 +94,7 @@ exports.VideoClip = function VideoClip(id, snapshot) {
     };
 
 
-    //return a promise of the new transcodeTask firebase Id
+    //return a promise of the new transcodeTaskId
     this.generateTranscodeTask = function() {
         var obj = this;
         var db = admin.database();
@@ -165,7 +164,7 @@ exports.VideoClip = function VideoClip(id, snapshot) {
     }; //end of generateTranscodeTask
 
 
-    //return a promise of the clip url
+    //return a promise of the clip storage or transcodeTaskId
     this.generateClip = function() {
         var obj = this;
         return obj.fetchSnapshotIfNeeded().then(function(snapshot) {
@@ -173,12 +172,12 @@ exports.VideoClip = function VideoClip(id, snapshot) {
             obj.val = snapshot.val();
             console.log("videoClip", obj.val);
 
-            if (obj.val.url) {
-                return Promise.resolve(obj.val.url); //clip already exist
+            if (obj.val.storage) {
+                return Promise.resolve(obj.val.storage); //clip already exist
             } else {
-                return obj.generateTranscodeTask().then(function(value) {
-                    console.log("value", value);
-                    return Promise.resolve("TODO");
+                return obj.generateTranscodeTask().then(function(transcodeTaskId) {
+                    console.log("transcodeTaskId", transcodeTaskId);
+                    return Promise.resolve(transcodeTaskId);
                 });
             }
         });

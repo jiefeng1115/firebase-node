@@ -60,7 +60,6 @@ localSession.fetchRelatedPlayerHighLightSnapshots().then(function(relatedSnapsho
 */
 
 //PlayerHighlight ===============================
-//TODO: FIREBASE WARNING: Using an unspecified index. Consider adding ".indexOn": "endDate" at /localSessions to your security rules for better performance
 
 var peeqPlayerHighlight = require("./peeq-playerhighlight");
 var playerHighlight = new peeqPlayerHighlight.PlayerHighlight(testPlayerHighlightId);
