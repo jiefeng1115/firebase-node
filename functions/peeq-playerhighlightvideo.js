@@ -100,7 +100,7 @@ exports.PlayerHighlightVideo = function PlayerHighlightVideo(id, snapshot) {
                 obj.val.videoClips.forEach(function(videoClipId) {
                     var videoClipObj = new peeqVideoClip.VideoClip(videoClipId);
 
-                    videoClip.addPlayerHighlightVideo(obj.id);
+                    videoClipObj.addPlayerHighlightVideo(obj.id);
 
                     var prom = videoClipObj.generateClip();
                     promises.push(prom);

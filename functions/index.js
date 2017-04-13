@@ -21,7 +21,6 @@ exports.onLocalSessionStarted = functions.database.ref('/localSessions/{localSes
 
 exports.onVideoStorage = functions.database.ref('/videos/{localSessionId}/{videoId}/storage').onWrite(event => {
     console.log("onVideoStorage event", event);
-
     var localSessionId = event.params.localSessionId;
     var videoId = event.params.videoId;
     var localSession = new peeqLocalSession.LocalSession(localSessionId);
@@ -35,7 +34,10 @@ exports.onVideoStorage = functions.database.ref('/videos/{localSessionId}/{video
                     var dummyPlayerHighlight = new peeqPlayerHighlight.PlayerHighlight(playerHighlightSnapshot.key);
                     generatePlayerHighlightPromises.push(dummyPlayerHighlight.generateHighlightIfNeeded());
                 });
-                return Promise.all(generatePlayerHighlightPromises);
+                return Promise.all(generatePlayerHighlightPromises).then((results) => {
+                    console.log("generatePlayerHighlightPromises", results);
+                    return Promise.resolve(results);
+                });
             }); //end of fetchRelatedPlayerHighlightSnapshots
         }
         return null;

@@ -50,6 +50,8 @@ exports.isRelated = function(snapshot1, snapshot2) {
         val2 = snapshot2.val();
         if ((val1.location) && (val2.location)) {
             return ((val1.user == val2.user) && (val1.channel == val2.channel) && (exports.isNearByGeoPoint(val1.location, val2.location)));
+        } else {
+            console.error("isRelated missing location", snapshot1.key, snapshot2.key);
         }
     }
     return false;
