@@ -96,6 +96,7 @@ exports.LocalSession = function LocalSession(id, snapshot) {
             if (obj.endDate) {
                 var endPDate = new peeqDate.PDate(obj.endDate);
                 if (endPDate.timeIntervalToNow() > isReadyForProcessingPlayerHighlightsThresholdEndDateToNow) {
+                    console.log("session was ended long ago, let's just process the highlight", obj.id);
                     return Promise.resolve(true);
                 }
             }
@@ -109,10 +110,12 @@ exports.LocalSession = function LocalSession(id, snapshot) {
                         isReadyPromises.push(prom);
                     });
                     return Promise.all(isReadyPromises).then((results) => {
+                        console.log("all related videos were uploaded", results);
                         return Promise.resolve(true);
                     });
                 } else {
                     //no related localSession
+                    console.log("no related localSession was found");
                     return Promise.resolve(true);
                 }
             });

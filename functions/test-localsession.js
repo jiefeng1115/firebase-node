@@ -2,7 +2,8 @@
 
 var peeqLocalSession = require("./peeq-localsession");
 
-var testLocalSessionId = "-KgpXL4n705tBzMeuKOy";
+//var testLocalSessionId = "-KgpXL4n705tBzMeuKOy";
+var testLocalSessionId = "-KhdK951Oc2Ra69WsXEX";
 
 var localSession = new peeqLocalSession.LocalSession(testLocalSessionId);
 
@@ -28,14 +29,15 @@ localSession.fetchVideoSnapshots().then((result) => {
 });
 */
 
-/*
+
 localSession.isReadyForProcessingPlayerHighlights().then((result) => {
     console.log("result", result);
 }).catch((err) => {
     console.error(err);
 });
-*/
 
+
+/*
 localSession.fetchRelatedPlayerHighlightSnapshots().then((result) => {
     console.log("result length", result.length);
     result.forEach((snapshot) => {
@@ -44,3 +46,4 @@ localSession.fetchRelatedPlayerHighlightSnapshots().then((result) => {
 }).catch((err) => {
     console.error(err);
 });
+*/
