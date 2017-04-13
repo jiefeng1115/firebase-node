@@ -54,7 +54,7 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
             var highlightedPDate = new peeqDate.PDate(val.timestamp);
 
             var startAtStr = val.timestamp;
-            var endAtStr = highlightedPDate.dateStrWithTimeOffset(peeqData.milliSecToHour * 6);
+            var endAtStr = highlightedPDate.dateStrWithTimeOffset(peeqDate.milliSecToHour * 6);
             //console.log("endAtStr", endAtStr);
 
             return ref.orderByChild("endDate").startAt(startAtStr).endAt(endAtStr).once("value").then(function(filteredSnapshots) {
