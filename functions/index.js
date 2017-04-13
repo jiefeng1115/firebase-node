@@ -32,7 +32,8 @@ exports.onVideoStorage = functions.database.ref('/videos/{localSessionId}/{video
                 var generatePlayerHighlightPromises = [];
                 playerHighlightSnapshots.forEach((playerHighlightSnapshot) => {
                     var dummyPlayerHighlight = new peeqPlayerHighlight.PlayerHighlight(playerHighlightSnapshot.key);
-                    generatePlayerHighlightPromises.push(dummyPlayerHighlight.generateHighlightIfNeeded());
+                    var prom = dummyPlayerHighlight.generateHighlightIfNeeded();
+                    generatePlayerHighlightPromises.push(prom);
                 });
                 return Promise.all(generatePlayerHighlightPromises).then((results) => {
                     console.log("generatePlayerHighlightPromises", results);

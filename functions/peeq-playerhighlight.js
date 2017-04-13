@@ -181,7 +181,9 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
                 });
 
                 return peeqPlayerHighlightVideo.createObjInFirebaseIfNeeded(obj.val.user, obj.id, videoClipIds).then(function(playerHighlightVideoResult) {
+                    console.log("playerHighlightVideoResult", playerHighlightVideoResult);
                     if (!playerHighlightVideoResult.isNew) {
+                        //console.log("playerHighlightVideo already exist " + playerHighlightVideoResult.id);
                         return Promise.reject("playerHighlightVideo already exist " + playerHighlightVideoResult.id);
                     } else {
                         var playerHighlightVideo = new peeqPlayerHighlightVideo.PlayerHighlightVideo(playerHighlightVideoResult.id);
@@ -191,8 +193,6 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
             });
         }
         return Promise.reject("empty stats");
-
-        //return obj.generateHighlightWithPlayerHighlightVideoSnapshot(obj.playerHighlightVideoSnapshot);
     }; //end of generateHighlightWithStatistics
 
 

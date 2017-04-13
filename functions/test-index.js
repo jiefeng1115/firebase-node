@@ -17,12 +17,13 @@ exports.onVideoStorageWithEvent = function(event) {
 
     return localSession.isReadyForProcessingPlayerHighlights().then((isReady) => {
         if (isReady) {
-            localSession.fetchRelatedPlayerHighlightSnapshots().then((playerHighlightSnapshots) => {
+            return localSession.fetchRelatedPlayerHighlightSnapshots().then((playerHighlightSnapshots) => {
                 console.log("playerHighlightSnapshots length", playerHighlightSnapshots.length);
                 var generatePlayerHighlightPromises = [];
                 playerHighlightSnapshots.forEach((playerHighlightSnapshot) => {
                     var dummyPlayerHighlight = new peeqPlayerHighlight.PlayerHighlight(playerHighlightSnapshot.key);
-                    generatePlayerHighlightPromises.push(dummyPlayerHighlight.generateHighlightIfNeeded());
+                    var prom = dummyPlayerHighlight.generateHighlightIfNeeded()
+                    generatePlayerHighlightPromises.push(prom);
                 });
                 return Promise.all(generatePlayerHighlightPromises);
             }); //end of fetchRelatedPlayerHighlightSnapshots
@@ -30,6 +31,7 @@ exports.onVideoStorageWithEvent = function(event) {
         return null;
     }); //end of isReadyForProcessingPlayerHighlights
 }; //end of onVideoStorageWithEvent
+
 
 exports.onVideoStorageWithEvent(event).then((result) => {
     console.log(result);

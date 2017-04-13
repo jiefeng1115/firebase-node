@@ -13,6 +13,7 @@ exports.objsAreEqual = function(v1, v2) {
 
 //return a promise of results {id, isNew}
 exports.createObjInFirebaseIfNeeded = function(userId, playerHighlightId, videoClipIds) {
+    //console.log("playerHighlightVideo", "createObjInFirebaseIfNeeded", userId, playerHighlightId, videoClipIds);
     var db = admin.database();
     var ref = db.ref("playerHighlightVideos");
 

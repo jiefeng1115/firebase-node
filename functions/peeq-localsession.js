@@ -105,7 +105,8 @@ exports.LocalSession = function LocalSession(id, snapshot) {
                     var isReadyPromises = [];
                     relatedSnapshots.forEach((snapshot) => {
                         var dummyLocalSession = new LocalSession(snapshot.key);
-                        isReadyPromises.push(dummyLocalSession.isRawVideoUploaded());
+                        var prom = dummyLocalSession.isRawVideoUploaded();
+                        isReadyPromises.push(prom);
                     });
                     return Promise.all(isReadyPromises).then((results) => {
                         return Promise.resolve(true);
