@@ -124,13 +124,10 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
             //save trackerStat to firebase
             if (overallStat.count > 0) {
                 var statRef = db.ref("trackerStatistics/");
-                statRef.set(trackerStat, function(error) {
+                statRef.update(trackerStat, function(error) {
                     if (error) {
                         console.error("Data could not be saved." + error);
                     }
-                    //else {
-                    //  console.log("Data saved successfully.");
-                    //}
                 });
                 console.log("trackerStat", trackerStat);
             }
