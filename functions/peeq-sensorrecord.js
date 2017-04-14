@@ -13,6 +13,14 @@ emptyStat = function() {
     return stat;
 };
 
+exports.calcMaxAtFrom = function(snapshotArray, maxVal) {
+    var maxSnapshot = snapshotArray.find(function(snapshot) {
+        return snapshot.val().signalStrength == maxVal;
+    });
+    var pDate = new peeqDate.PDate(maxSnapshot.val().timestamp);
+    return pDate.timeInterval;
+};
+
 exports.calculateStatisticFromSnapshotArray = function(snapshotArray) {
     //console.log("snapshotArray", snapshotArray);
     if (snapshotArray.length > 0) {
@@ -42,6 +50,8 @@ exports.calculateStatisticFromSnapshotArray = function(snapshotArray) {
         statistic.duration = statistic.endTime - statistic.startTime;
         statistic.numOfPlayers = 1;
 
+        statistic.maxAt = exports.calcMaxAtFrom(snapshotArray, statistic.max);
+
         return statistic;
     } else {
         return emptyStat();
@@ -67,6 +77,11 @@ exports.calculateOverallStatisticFromStatisticArray = function(statisticArray) {
             stat.endTime = Math.max(acc.endTime, val.endTime);
             stat.duration = stat.endTime - stat.startTime;
             stat.numOfPlayers = acc.numOfPlayers + val.numOfPlayers;
+            if (!acc.maxAts) {
+                acc.maxAts = [acc.maxAt];
+            }
+            stat.maxAts = acc.maxAts.push(val.maxAt);
+
             return stat;
         });
     }
