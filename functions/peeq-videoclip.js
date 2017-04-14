@@ -130,8 +130,9 @@ exports.VideoClip = function VideoClip(id, snapshot) {
 
                 var highlightStartInVideoOffset = (adjustedStartTime - videoStartTime) / 1000; //in sec
                 var highlightDurationInVideo = (adjustedEndTime - adjustedStartTime) / 1000; //in sec
+                var thumbnailAtInVideoOffset = (val.thumbnailAt - videoStartTime) / 1000; // in sec
 
-                console.log("highlightStartInVideoOffset", highlightStartInVideoOffset, "highlightDurationInVideo", highlightDurationInVideo);
+                console.log("highlightStartInVideoOffset", highlightStartInVideoOffset, "highlightDurationInVideo", highlightDurationInVideo, "thumbnailAtInVideoOffset", thumbnailAtInVideoOffset);
 
                 //create transcodeTask in Firebase
                 var newObj = {};
@@ -142,6 +143,7 @@ exports.VideoClip = function VideoClip(id, snapshot) {
                 newObj.parameters.highlightStartInVideoOffset = highlightStartInVideoOffset;
                 newObj.parameters.highlightDurationInVideo = highlightDurationInVideo;
                 newObj.parameters.sourceFile = val.storage; //i.e. "peeq-videos/videos/-Kh8zowt8ZvWhrRTGu96/-Kh8zrdjXQL-nXFGfFSK/raw_2017-04-07T19:58:51.549Z.mov"
+                newObj.parameters.thumbnailAtInVideoOffset = thumbnailAtInVideoOffset;
 
                 newObj.videoClip = obj.id;
 
