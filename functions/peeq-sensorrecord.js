@@ -61,7 +61,7 @@ exports.calculateStatisticFromSnapshotArray = function(snapshotArray) {
 
 exports.calculateOverallStatisticFromStatisticArray = function(statisticArray) {
     //console.log("statisticArray", statisticArray);
-    if ((!statisticArray) || (statisticArray.length == 0)) {
+    if ((!statisticArray) || (statisticArray.length === 0)) {
         return emptyStat();
     } else if (statisticArray.length == 1) {
         return statisticArray[0];
