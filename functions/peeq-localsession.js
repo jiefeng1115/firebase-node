@@ -110,8 +110,14 @@ exports.LocalSession = function LocalSession(id, snapshot) {
                         isReadyPromises.push(prom);
                     });
                     return Promise.all(isReadyPromises).then((results) => {
-                        console.log("all related videos were uploaded", results);
-                        return Promise.resolve(true);
+                        var notReadyResults = results.filter(function(result) { return result === false; });
+                        if (notReadyResults > 0) {
+                            console.log(notReadyResults.length, "related videos were not uploaded");
+                            return Promise.resolve(false);
+                        } else {
+                            console.log("all related videos were uploaded", results);
+                            return Promise.resolve(true);
+                        }
                     });
                 } else {
                     //no related localSession
