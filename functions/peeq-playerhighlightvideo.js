@@ -1,6 +1,9 @@
+/*jshint esversion: 6 */
+
 var peeqFirebase = require("./peeq-firebase");
 var admin = peeqFirebase.admin;
 var peeqVideoClip = require("./peeq-videoclip");
+var peeqAppEngineFirebase = require("./peeq-appengine-firebase");
 
 exports.objsAreEqual = function(v1, v2) {
     //console.log("objsAreEqual", v1, v2);
@@ -109,8 +112,23 @@ exports.PlayerHighlightVideo = function PlayerHighlightVideo(id, snapshot) {
 
                 //values are the clip storage or transcodeTaskId
                 return Promise.all(promises).then(function(clipStoragesOrTranscodeTaskIds) {
-                    console.log("clipStoragesOrTranscodeTaskIds", clipStoragesOrTranscodeTaskIds);
-                    return Promise.resolve(clipStoragesOrTranscodeTaskIds);
+                    if (clipStoragesOrTranscodeTaskIds.every(function(element) { return element.startsWith('peeq-videos'); })) {
+                        console.log("all video clips are ready, let's generate the merge task for playerHighlightVideo", obj.id);
+                        return peeqAppEngineFirebase.isPlayerHighlightVideoReadyToProceed(obj.id).then((playerHighlightVideoInfoOrNull) => {
+                            if (playerHighlightVideoInfoOrNull) {
+                                return peeqAppEngineFirebase.generateTranscodeTaskMergeWithPlayerHighlightVideoInfo(playerHighlightVideoInfoOrNull).then((mergeTranscodeTaskId) => {
+                                    console.log("mergeTranscodeTaskId", mergeTranscodeTaskId);
+                                    return Promise.resolve(mergeTranscodeTaskId);
+                                });
+                            } else {
+                                console.log("somehow it is not ready yet according to isPlayerHighlightVideoReadyToProceed");
+                                return Promise.resolve(clipStoragesOrTranscodeTaskIds);
+                            }
+                        });
+                    } else {
+                        console.log("clipStoragesOrTranscodeTaskIds", clipStoragesOrTranscodeTaskIds);
+                        return Promise.resolve(clipStoragesOrTranscodeTaskIds);
+                    }
                 });
             }
         });

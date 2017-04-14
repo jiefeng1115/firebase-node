@@ -190,7 +190,7 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
                     */
                     console.log("playerHighlightVideo already exist " + playerHighlightVideoResult.id);
                     var playerHighlightVideo = new peeqPlayerHighlightVideo.PlayerHighlightVideo(playerHighlightVideoResult.id);
-                    return playerHighlightVideo.generateVideo();
+                    return playerHighlightVideo.generateVideo(); //video storage or [clipStorage / transcodeTaskId]
                 });
             });
         }
