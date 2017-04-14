@@ -52,8 +52,11 @@ exports.setPlayerHighlightVideoStorage = function(id, value) {
     var taskRef = ref.child(id);
 
     return taskRef.child("storage").set(value).then(function() {
-        console.log("setPlayerHighlightVideoStorage done", id, value);
-        return Promise.resolve(id);
+        var currentTime = new Date().getTime();
+        return taskRef.child("updatedAt").set(currentTime).then(function() {
+            console.log("setPlayerHighlightVideoStorage done", id, value);
+            return Promise.resolve(id);
+        });
     });
 };
 
@@ -64,8 +67,11 @@ exports.setObjWith = function(refName, id, fieldName, value) {
     var idRef = ref.child(id);
 
     return idRef.child(fieldName).set(value).then(function() {
-        console.log("setWith successed", refName, id, fieldName, value);
-        return Promise.resolve(id);
+        var currentTime = new Date().getTime();
+        return idRef.child("updatedAt").set(currentTime).then(function() {
+            console.log("setWith successed", refName, id, fieldName, value);
+            return Promise.resolve(id);
+        });
     });
 };
 
