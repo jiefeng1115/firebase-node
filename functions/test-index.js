@@ -22,7 +22,7 @@ exports.onVideoStorageWithEvent = function(event) {
                 var generatePlayerHighlightPromises = [];
                 playerHighlightSnapshots.forEach((playerHighlightSnapshot) => {
                     var dummyPlayerHighlight = new peeqPlayerHighlight.PlayerHighlight(playerHighlightSnapshot.key);
-                    var prom = dummyPlayerHighlight.generateHighlightIfNeeded()
+                    var prom = dummyPlayerHighlight.generateHighlightIfNeeded();
                     generatePlayerHighlightPromises.push(prom);
                 });
                 return Promise.all(generatePlayerHighlightPromises);

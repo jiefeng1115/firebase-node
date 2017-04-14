@@ -115,7 +115,7 @@ exports.LocalSession = function LocalSession(id, snapshot) {
                             console.log(notReadyResults.length, "related videos were not uploaded");
                             return Promise.resolve(false);
                         } else {
-                            console.log("all related videos were uploaded", results);
+                            console.log(results.length, "related videos were uploaded");
                             return Promise.resolve(true);
                         }
                     });
