@@ -168,6 +168,7 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
                 videoClip.localSession = value.localSession;
                 videoClip.startTime = value.highlightStartTime;
                 videoClip.endTime = value.highlightEndTime;
+                videoClip.thumbnailTime = value.maxAt;
                 return videoClip;
             });
             console.log("videoClips", videoClips);
