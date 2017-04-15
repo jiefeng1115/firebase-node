@@ -9,9 +9,9 @@ var firstBy = require('thenby');
 var peeqPlayerHighlightVideo = require("./peeq-playerhighlightvideo");
 var peeqVideoClip = require("./peeq-videoclip");
 
-const highlightedPDateOffsetStart = -1000 * 15; //TODO: Make this dynamic depends on the tracker data
-const highlightedPDateOffsetEnd = 1000 * 5;
-const generateHighlightDefaultNumOfVideos = 5; //TODO: Make this dynamic depends on the tracker data
+const highlightedPDateOffsetStart = -1000 * 13; //TODO: Make this dynamic depends on the tracker data
+const highlightedPDateOffsetEnd = 1000 * 2;
+const generateHighlightDefaultNumOfVideos = 3; //TODO: Make this dynamic depends on the tracker data
 
 //PlayerHighlight class
 exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
