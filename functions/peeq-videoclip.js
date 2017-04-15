@@ -130,7 +130,7 @@ exports.VideoClip = function VideoClip(id, snapshot) {
 
                 var highlightStartInVideoOffset = (adjustedStartTime - videoStartTime) / 1000; //in sec
                 var highlightDurationInVideo = (adjustedEndTime - adjustedStartTime) / 1000; //in sec
-                var thumbnailAtInVideoOffset = (obj.val.thumbnailAt - videoStartTime) / 1000; // in sec
+                var thumbnailAtInVideoOffset = (obj.val.thumbnailAt - adjustedStartTime) / 1000; // in sec
 
                 console.log("highlightStartInVideoOffset", highlightStartInVideoOffset, "highlightDurationInVideo", highlightDurationInVideo, "thumbnailAtInVideoOffset", thumbnailAtInVideoOffset);
 
