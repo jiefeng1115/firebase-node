@@ -29,13 +29,13 @@ localSession.fetchVideoSnapshots().then((result) => {
 });
 */
 
-
+/*
 localSession.isReadyForProcessingPlayerHighlights().then((result) => {
     console.log("result", result);
 }).catch((err) => {
     console.error(err);
 });
-
+*/
 
 /*
 localSession.fetchRelatedPlayerHighlightSnapshots().then((result) => {
@@ -47,3 +47,5 @@ localSession.fetchRelatedPlayerHighlightSnapshots().then((result) => {
     console.error(err);
 });
 */
+
+peeqLocalSession.LocalSessionSnapshotsAtDate("4-16-2017");

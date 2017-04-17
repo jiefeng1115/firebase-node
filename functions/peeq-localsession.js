@@ -151,3 +151,24 @@ exports.LocalSession = function LocalSession(id, snapshot) {
     }; //end of fetchRelatedPlayerHighlightSnapshots
 
 }; //End of exports.LocalSession
+
+//return promise of localSession snapshots at a particular date
+//i.e. LocalSessionAtDate("4-16-2017")
+exports.LocalSessionSnapshotsAtDate = function(dateStrInput) {
+    var targetStartPDate = new peeqDate.PDate(dateStrInput);
+    var filterStartDateStrStartAt = targetStartPDate.dateStrWithTimeOffset(0);
+    var filterStartDateStrEndAt = targetStartPDate.dateStrWithTimeOffset(peeqDate.milliSecToHour * 24);
+    console.log("startAt", filterStartDateStrStartAt, "endAt", filterStartDateStrEndAt);
+
+    var db = admin.database();
+    var ref = db.ref("localSessions");
+
+    return ref.orderByChild("startDate").startAt(filterStartDateStrStartAt).endAt(filterStartDateStrEndAt).once("value").then((filteredSnapshots) => {
+        var snapshots = [];
+        filteredSnapshots.forEach(function(childSnapshot) {
+            console.log("childSnapshot", childSnapshot.val());
+            snapshots.push(childSnapshot);
+        });
+        return Promise.resolve(snapshots);
+    }); //end of orderByChild
+}; //end of LocalSessionSnapshotsAtDate
