@@ -7,16 +7,13 @@ var peeqLocalSession = require("./peeq-localsession");
 
 exports.VideoSnapshotsAtDate = function(dateStrInput) {
     return peeqLocalSession.LocalSessionSnapshotsAtDate(dateStrInput).then((localSessionSnapshots) => {
-        var outputSnapshots = [];
+        var promises = [];
         localSessionSnapshots.forEach((localSessionSnapshot) => {
             var localSession = new peeqLocalSession.LocalSession(localSessionSnapshot.key);
-            localSession.fetchVideoSnapshots().then((videoSnapshots) => {
-                videoSnapshots.forEach((videoSnapshot) => {
-                    console.log("videoSnapshot", videoSnapshot.val());
-                    outputSnapshots.push(videoSnapshot);
-                });
-            });
+            var prom = localSession.fetchVideoSnapshots();
+            promises.push(prom);
         });
+        return Promise.all(promises);
     });
 }; //end of VideoSnapshotsAtDate
 
@@ -39,7 +36,7 @@ exports.SearchFromAllVideoSnapshotsAtDate = function(dateStrInput) {
             if (keys.length > 0) {
                 var videoVal = childVal[keys[0]];
                 if ((videoVal.startDate > filterStartDateStrStartAt) && (videoVal.startDate < filterStartDateStrEndAt)) {
-                    console.log(videoVal)
+                    console.log(videoVal);
                     snapshots.push(childSnapshot);
                 }
             }
