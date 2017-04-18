@@ -27,7 +27,7 @@ exports.onVideoStorage = functions.database.ref('/videos/{localSessionId}/{video
 
     return localSession.isReadyForProcessingPlayerHighlights().then((isReady) => {
         if (isReady) {
-            localSession.fetchRelatedPlayerHighlightSnapshots().then((playerHighlightSnapshots) => {
+            return localSession.fetchRelatedPlayerHighlightSnapshots().then((playerHighlightSnapshots) => {
                 console.log("playerHighlightSnapshots length", playerHighlightSnapshots.length);
                 var generatePlayerHighlightPromises = [];
                 playerHighlightSnapshots.forEach((playerHighlightSnapshot) => {
