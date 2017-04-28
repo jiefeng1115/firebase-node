@@ -166,7 +166,7 @@ exports.LocalSessionSnapshotsAtDate = function(dateStrInput) {
     return ref.orderByChild("startDate").startAt(filterStartDateStrStartAt).endAt(filterStartDateStrEndAt).once("value").then((filteredSnapshots) => {
         var snapshots = [];
         filteredSnapshots.forEach(function(childSnapshot) {
-            console.log("childSnapshot", childSnapshot.val());
+            //console.log("childSnapshot", childSnapshot.val());
             snapshots.push(childSnapshot);
         });
         return Promise.resolve(snapshots);
