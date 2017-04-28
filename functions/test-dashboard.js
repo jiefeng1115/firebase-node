@@ -4,5 +4,14 @@ var peeqDashboard = require("./peeq-dashboard");
 
 var targetDateStr = "4-24-2017";
 
-//List all raw videos at date
-peeqDashboard.listRawVideosAtDate(targetDateStr);
+/*
+peeqDashboard.listRawVideosAtDate(targetDateStr)
+    .catch((err) => {
+        console.log(err);
+    });
+*/
+
+peeqDashboard.listSensorRecordsAtDate(targetDateStr)
+    .catch((err) => {
+        console.log(err);
+    });

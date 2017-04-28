@@ -1,4 +1,7 @@
+/*jshint esversion: 6 */
+
 var peeqDate = require("./peeq-date");
+var peeqLocalSession = require("./peeq-localsession");
 
 emptyStat = function() {
     var stat = {};
@@ -146,3 +149,15 @@ exports.fetchTrackerStatisticOfLocalSessionInTimeWindow = function(localSessionS
         return Promise.resolve(overallStat); //return overallStat as promise
     });
 }; //End of fetchTrackerStatisticOfLocalSessionInTimeWindow
+
+exports.SensorRecordsSnapshotsAtDate = function(dateStrInput) {
+    return peeqLocalSession.LocalSessionSnapshotsAtDate(dateStrInput).then((localSessionSnapshots) => {
+        var promises = [];
+        localSessionSnapshots.forEach((localSessionSnapshot) => {
+            var localSession = new peeqLocalSession.LocalSession(localSessionSnapshot.key);
+            var prom = localSession.fetchSensorRecordSnapshots();
+            promises.push(prom);
+        });
+        return Promise.all(promises);
+    });
+}; //end of SensorRecordsSnapshotsAtDate

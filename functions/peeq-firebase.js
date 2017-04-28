@@ -59,14 +59,22 @@ exports.isRelated = function(snapshot1, snapshot2) {
 
 exports.snapshotsToArray = function(snapshots, filterFunction) {
     var output = [];
-
     snapshots.forEach(function(childSnapshot) {
         output.push(childSnapshot);
     });
-
     if (filterFunction) {
         output.filter(filterFunction);
     }
-
     return output;
 };
+
+/*
+//flatten one level of childSnapshots into an array 
+exports.flattenOne = function(snapshots) {
+    var childSnapshots = [];
+    this.forEach((childSnapshot) => {
+        childSnapshots.push(childSnapshot);
+    });
+    return childSnapshots;
+};
+*/

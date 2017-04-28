@@ -1,5 +1,7 @@
 /*jshint esversion: 6 */
 
+var peeqStandardObjects = require("./standard-objects/peeq-standard-objects");
+
 var peeqFirebase = require("./peeq-firebase");
 var admin = peeqFirebase.admin;
 var peeqDate = require("./peeq-date");
@@ -62,8 +64,7 @@ exports.LocalSession = function LocalSession(id, snapshot) {
         });
     }; //end of fetchRelatedLocalSessionSnapshots
 
-
-    //return a promose of video snapshots or [] for no video
+    //return a promose of video snapshots or [] for nothing
     this.fetchVideoSnapshots = function() {
         return peeqFirebase.snapshotOf("videos/" + this.id).then((snapshot) => {
             var childSnapshots = [];
@@ -76,6 +77,12 @@ exports.LocalSession = function LocalSession(id, snapshot) {
         });
     }; //end of fetchVideoSnapshots
 
+    //return a promose of sensorRecord snapshots or [] for nothing
+    this.fetchSensorRecordSnapshots = function() {
+        return peeqFirebase.snapshotOf("sensorRecords/" + this.id).then((snapshot) => {
+            return (snapshot) && (snapshot.exists()) ? peeqFirebase.snapshotsToArray(snapshot) : [];
+        });
+    }; //end of fetchSensorRecordSnapshots
 
     //return a promise of bool, stating if the associated raw video had been uploaded
     this.isRawVideoUploaded = function() {
