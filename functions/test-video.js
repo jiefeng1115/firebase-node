@@ -2,5 +2,5 @@
 
 var peeqVideo = require("./peeq-video");
 
-//peeqVideo.VideoSnapshotsAtDate("4-16-2017");
-peeqVideo.SearchFromAllVideoSnapshotsAtDate("4-16-2017");
+peeqVideo.VideoSnapshotsAtDate("4-24-2017");
+//peeqVideo.SearchFromAllVideoSnapshotsAtDate("4-16-2017");

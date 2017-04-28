@@ -135,7 +135,7 @@ exports.LocalSession = function LocalSession(id, snapshot) {
             var val = obj.val;
             var db = admin.database();
             var ref = db.ref("playerHighlights");
-
+            console.log("fetchRelatedPlayerHighlightSnapshots startDate", val.startDate, "endDate", val.endDate);
             return ref.orderByChild("timestamp").startAt(val.startDate).endAt(val.endDate).once("value").then(function(filteredSnapshot) {
                 //console.log("filteredSnapshot.val", filteredSnapshot.val());
                 var relatedSnapshots = [];

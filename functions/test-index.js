@@ -6,8 +6,8 @@ var peeqPlayerHighlight = require("./peeq-playerhighlight");
 //{ eventType: 'providers/google.firebase.database/eventTypes/ref.write', timestamp: '2017-04-13T19:09:34.319Z', auth: { admin: false, variable: { email_verified: false, provider: 'password', email: 'admin@peeqdata.com', user_id: 'W4FoiXe2KcYwu7swdxDR67NHFcj2', token: [Object], uid: 'W4FoiXe2KcYwu7swdxDR67NHFcj2' } }, data: DeltaSnapshot { app: FirebaseApp { firebaseInternals_: [Object], services_: [Object], isDeleted_: false, name_: 'ad668ab728531906d3b9adba0502c49e27d9b602', options_: [Object], database: [Function: bound ], auth: [Function: bound ], messaging: [Function: bound ], INTERNAL: [Object] }, adminApp: FirebaseApp { firebaseInternals_: [Object], services_: [Object], isDeleted_: false, name_: '__admin__', options_: [Object], database: [Function: bound ], auth: [Function: bound ], messaging: [Function: bound ], INTERNAL: [Object] }, _path: '/videos/-KhchxtOXjLJvft63vUP/-Khchy0GRSb1M9DuzEQ3/storage', _data: null, _delta: 'peeq-videos/videos/-KhchxtOXjLJvft63vUP/-Khchy0GRSb1M9DuzEQ3/raw_2017-04-13T19:08:52.743Z.mov', _newData: 'peeq-videos/videos/-KhchxtOXjLJvft63vUP/-Khchy0GRSb1M9DuzEQ3/raw_2017-04-13T19:08:52.743Z.mov' }, params: { localSessionId: '-KhchxtOXjLJvft63vUP', videoId: '-Khchy0GRSb1M9DuzEQ3' }, eventId: 'Yl06eWEMhmYBXw4QV2b5AR7TK3o=', resource: 'projects/_/instances/peeq-b81e7/refs/videos/-KhchxtOXjLJvft63vUP/-Khchy0GRSb1M9DuzEQ3/storage' }
 var event = {};
 event.params = {};
-event.params.localSessionId = '-Khhx92G1OmeQ_ZfFRjT';
-event.params.videoId = '-Khchy0GRSb1M9DuzEQ3';
+event.params.localSessionId = '-Ki793xQbQo1WHmjOtX-';
+event.params.videoId = '-Ki7943tlS5YzVyuw4xD';
 
 exports.onVideoStorageWithEvent = function(event) {
     console.log("onVideoStorageWithEvent", event);
