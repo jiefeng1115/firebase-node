@@ -220,3 +220,17 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
     }; //end of generateHighlightIfNeeded
 
 }; //End of exports.PlayerHighlight
+
+exports.PlayerHighlightsSnapshotsAtDate = function(dateStrInput) {
+    var targetStartPDate = new peeqDate.PDate(dateStrInput);
+    var filterStartDateStrStartAt = targetStartPDate.dateStrWithTimeOffset(0);
+    var filterStartDateStrEndAt = targetStartPDate.dateStrWithTimeOffset(peeqDate.milliSecToHour * 24);
+    console.log("startAt", filterStartDateStrStartAt, "endAt", filterStartDateStrEndAt);
+
+    var db = admin.database();
+    var ref = db.ref("playerHighlights");
+
+    return ref.orderByChild("timestamp").startAt(filterStartDateStrStartAt).endAt(filterStartDateStrEndAt).once("value").then((filteredSnapshots) => {
+        return peeqFirebase.snapshotsToArray(filteredSnapshots);
+    });
+}; //end of PlayerHighlightsSnapshotsAtDate

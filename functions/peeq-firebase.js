@@ -78,3 +78,11 @@ exports.flattenOne = function(snapshots) {
     return childSnapshots;
 };
 */
+
+//return the same array for chain operation
+Array.prototype.logEachSnapshot = function() {
+    this.forEach((element) => {
+        console.log(element.key, " : ", element.val());
+    });
+    return this;
+};

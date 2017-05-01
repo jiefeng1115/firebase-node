@@ -2,8 +2,10 @@
 
 var peeqStandardObjects = require("./standard-objects/peeq-standard-objects");
 
+var peeqFirebase = require("./peeq-firebase");
 var peeqVideo = require("./peeq-video");
 var peeqSensorRecord = require("./peeq-sensorrecord");
+var peeqPlayerHighlight = require("./peeq-playerhighlight");
 
 //return a promise of flattened video snapshots
 exports.listRawVideosAtDate = function(dateStr) {
@@ -60,6 +62,22 @@ exports.listSensorRecordsAtDate = function(dateStr) {
         info.numOfRecords = snapshots.length;
 
         console.log("\nlistSensorRecordsAtDate:");
+        for (var key in info) {
+            console.log(key, ":", info[key]);
+        }
+        console.log("\n");
+
+        return snapshots;
+    });
+};
+
+exports.listPlayerHighlightsAtDate = function(dateStr) {
+    return peeqPlayerHighlight.PlayerHighlightsSnapshotsAtDate(dateStr).then((snapshots) => {
+        snapshots.logEachSnapshot();
+
+        var info = {};
+        info.numOfRecords = snapshots.length;
+        console.log("\nlistPlayerHighlightsAtDate");
         for (var key in info) {
             console.log(key, ":", info[key]);
         }

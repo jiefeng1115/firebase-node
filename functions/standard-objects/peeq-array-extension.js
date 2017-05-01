@@ -21,18 +21,6 @@ Array.prototype.logEach = function() {
     return this;
 };
 
-/*
-Array.prototype.sortByStartDate = function() {
-    return this.sort((a, b) => {
-        if ((a.startDate) && (b.startDate)) {
-            return ((a.startDate <= b.startDate) ? -1 : 1);
-        } else {
-            return 0;
-        }
-    });
-};
-*/
-
 Array.prototype.sortByKeyName = function(keyName) {
     return this.sort((a, b) => {
         if ((a[keyName]) && (b[keyName])) {

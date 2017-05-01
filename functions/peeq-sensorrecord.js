@@ -80,10 +80,15 @@ exports.calculateOverallStatisticFromStatisticArray = function(statisticArray) {
             stat.endTime = Math.max(acc.endTime, val.endTime);
             stat.duration = stat.endTime - stat.startTime;
             stat.numOfPlayers = acc.numOfPlayers + val.numOfPlayers;
+
+            stat.maxAt = (val.max > acc.max) ? val.maxAt : acc.maxAt;
+
+            /*
             if (!acc.maxAts) {
                 acc.maxAts = [acc.maxAt];
             }
             stat.maxAts = acc.maxAts.push(val.maxAt);
+            */
 
             return stat;
         });
