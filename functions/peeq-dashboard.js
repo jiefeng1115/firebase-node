@@ -19,15 +19,18 @@ exports.listRawVideosAtDate = function(dateStr) {
             var info = {};
             info.numOfRecords = snapshots.length;
 
-            info.missingEndDate = snapshotVals.filter((val) => {
+            var missingEndDateSnapshotVals = snapshotVals.filter((val) => {
                 return (val.endDate) ? false : true;
-            }).length;
+            });
+            console.log("\nmissingEndDateSnapshotVals");
+            info.missingEndDate = missingEndDateSnapshotVals.logEach().length;
 
             uploadedSnapshotVals = snapshotVals.filter((val) => {
                 return (val.storage) ? true : false;
             });
             info.uploaded = uploadedSnapshotVals.length;
 
+            console.log("\nuploadedSnapshotVals");
             info.missingUrl = info.uploaded - uploadedSnapshotVals.filter((val) => {
                     return (val.raw) ? true : false;
                 }).map((val) => {
@@ -35,10 +38,11 @@ exports.listRawVideosAtDate = function(dateStr) {
                 }).logEach()
                 .length;
 
-            console.log("\ninfo:");
+            console.log("\nlistRawVideosAtDate:");
             for (var key in info) {
                 console.log(key, ":", info[key]);
             }
+            console.log("\n");
 
             return snapshots;
         });
@@ -55,10 +59,11 @@ exports.listSensorRecordsAtDate = function(dateStr) {
         info.numOfLocalSession = snapshotArrs.lenth;
         info.numOfRecords = snapshots.length;
 
-        console.log("\ninfo:");
+        console.log("\nlistSensorRecordsAtDate:");
         for (var key in info) {
             console.log(key, ":", info[key]);
         }
+        console.log("\n");
 
         return snapshots;
     });
