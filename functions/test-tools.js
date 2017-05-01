@@ -2,10 +2,17 @@
 
 var peeqTools = require("./peeq-tools");
 
-var testVideoUrl = "https://firebasestorage.googleapis.com/v0/b/peeq-b81e7.appspot.com/o/peeq-videos%2Fvideos%2F-KituJKQWnk92Ru0E1PU%2F-KituJM0bh-p4GhCyiE5%2Fraw_2017-04-29T13%3A32%3A04.467Z.mov?alt=media&token=2777e82e-f35d-4adf-acc5-38caa80ec784";
-
+/*
+var testVideoUrl = "https://firebasestorage.googleapis.com/v0/b/peeq-b81e7.appspot.com/o/peeq-videos%2Fvideos%2F-KivX1sC-xWrXRF7gLTx%2F-KivX1sk9Fv1J5AaY1te%2Fraw_2017-04-29T21:05:15.855Z.mov?alt=media&token=cae8e19b-6c8b-45d6-9844-731f1fc54b9e";
 peeqTools.getVideoDurationFromUrl(testVideoUrl).then((duration) => {
-    console.log(duration);
+    console.log("resolved", duration);
+}).catch((err) => {
+    console.error(err);
+});
+*/
+
+peeqTools.fixMissingEndDateVideosAtDate("4-29-2017").then((results) => {
+    console.log("results", results.length, results);
 }).catch((err) => {
     console.error(err);
 });
