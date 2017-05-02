@@ -134,4 +134,11 @@ exports.PlayerHighlightVideo = function PlayerHighlightVideo(id, snapshot) {
         });
     }; //end of generateVideo
 
+}; //end of PlayerHighlightVideo
+
+//return a promise of the snapshot or null
+exports.fetchPlayerHighlightVideoSnapshotWithPlayerHighlightId = function(playerHighlightId) {
+    var db = admin.database();
+    var ref = db.ref("playerHighlightVideos");
+    return ref.orderByChild("playerHighlight").equalTo(playerHighlightId).once("value");
 };

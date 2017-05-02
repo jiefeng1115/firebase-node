@@ -6,6 +6,7 @@ var peeqFirebase = require("./peeq-firebase");
 var peeqVideo = require("./peeq-video");
 var peeqSensorRecord = require("./peeq-sensorrecord");
 var peeqPlayerHighlight = require("./peeq-playerhighlight");
+var peeqPlayerHighlightVideo = require("./peeq-playerhighlightvideo");
 
 //return a promise of flattened video snapshots
 exports.listRawVideosAtDate = function(dateStr) {
@@ -77,12 +78,46 @@ exports.listPlayerHighlightsAtDate = function(dateStr) {
 
         var info = {};
         info.numOfRecords = snapshots.length;
-        console.log("\nlistPlayerHighlightsAtDate");
-        for (var key in info) {
-            console.log(key, ":", info[key]);
-        }
-        console.log("\n");
 
-        return snapshots;
+        var promises = [];
+        snapshots.forEach((snapshot) => {
+            var prom = peeqPlayerHighlightVideo.fetchPlayerHighlightVideoSnapshotWithPlayerHighlightId(snapshot.key);
+            promises.push(prom);
+        });
+
+        return Promise.all(promises).then((phVideoSnapshots) => {
+
+            console.log("\ngeneratedVideoSnapshots");
+            var generatedVideoSnapshots = phVideoSnapshots.filter((snap01) => {
+                return ((snap01 !== null) && snap01.exists());
+            }).filter((snap02) => {
+                var val02 = snap02.val();
+                var key02s = Object.keys(val02);
+                var key02 = key02s[0];
+                return (val02[key02].storage) ? true : false;
+            }).logEachSnapshot();
+
+            info.numOfGenerated = generatedVideoSnapshots.length;
+
+            console.log("\nlistPlayerHighlightsAtDate");
+            for (var key in info) {
+                console.log(key, ":", info[key]);
+            }
+            console.log("\n");
+
+        });
+    });
+};
+
+exports.generateAllHighlightsAtDate = function(dateStr) {
+    return peeqPlayerHighlight.PlayerHighlightsSnapshotsAtDate(dateStr).then((snapshots) => {
+        var promises = [];
+        snapshots.forEach((snapshot) => {
+            var testPlayerHighlightId = snapshot.key;
+            var playerHighlight = new peeqPlayerHighlight.PlayerHighlight(testPlayerHighlightId);
+            var prom = playerHighlight.generateHighlightIfNeeded();
+            promises.push(prom);
+        });
+        return Promise.all(promises);
     });
 };
