@@ -7,6 +7,8 @@ var peeqVideo = require("./peeq-video");
 var peeqSensorRecord = require("./peeq-sensorrecord");
 var peeqPlayerHighlight = require("./peeq-playerhighlight");
 var peeqPlayerHighlightVideo = require("./peeq-playerhighlightvideo");
+var peeqLocalSession = require("./peeq-localsession");
+var peeqStorage = require("./peeq-storage");
 
 //return a promise of flattened video snapshots
 exports.listRawVideosAtDate = function(dateStr) {
@@ -91,14 +93,52 @@ exports.listPlayerHighlightsAtDate = function(dateStr) {
 
         return Promise.all(promises).then((snapshots) => {
             console.log("\ngeneratedVideos");
+            var promises02 = [];
             var snapshotsWithoutVideo = snapshots.filter((snap01) => {
                 var phVideoSnapshot = snap01.phVideoSnapshot;
+
+                /*
+                if (phVideoSnapshot.hasChildren()) {
+                    snap01.phVideoSnapshot.forEach(snap03 => {
+                        if ((snap03) && (snap03.exists())) {
+                            var val03 = snap03.val();
+                            var keys03 = Object.keys(val03);
+                            var key03 = keys03[0];
+                            if (val03[key03].storage) {
+                                phVideoSnapshot = snap03;
+                            }
+                        }
+                    });
+                }
+                */
+
                 if ((phVideoSnapshot) && (phVideoSnapshot.exists())) {
                     var val = phVideoSnapshot.val();
                     var keys = Object.keys(val);
                     var key = keys[0];
                     if (val[key].storage) {
-                        console.log(snap01.key, val[key].storage);
+                        if (val[key].video) {
+                            if (Array.isArray(val[key].video)) {
+                                var url = val[key].video[0];
+                                var prom = phVideoSnapshot.child(key).ref.child("video").set(url);
+                                console.log(key, url, "\n");
+                                promises02.push(prom);
+                            } else {
+                                console.log(key, val[key].video, "\n");
+                            }
+                        } else {
+                            var prom02 = peeqStorage.downloadUrl(val[key].storage).then(urls => {
+                                if (urls[0]) {
+                                    var url = urls[0];
+                                    console.log(snap01.key, url, "\n");
+                                    return phVideoSnapshot.child(key).ref.child("video").set(url);
+                                } else {
+                                    return Promise.reject("invalid urls");
+                                }
+                            });
+                            promises02.push(prom02);
+                        }
+
                         return false;
                     } else {
                         return true;
@@ -123,6 +163,7 @@ exports.listPlayerHighlightsAtDate = function(dateStr) {
             }
             console.log("\n");
 
+            return Promise.all(promises02);
         });
     });
 };
@@ -137,5 +178,15 @@ exports.generateAllHighlightsAtDate = function(dateStr) {
             promises.push(prom);
         });
         return Promise.all(promises);
+    });
+};
+
+exports.listSensorRecordsSnapshotsFromLocalSession = function(localSessionId) {
+    var localSession = new peeqLocalSession.LocalSession(localSessionId);
+    return localSession.fetchSensorRecordSnapshots().then((snapshots) => {
+        snapshots.forEach((snapshot) => {
+            var val = snapshot.val();
+            console.log(val.timestamp, val.player);
+        });
     });
 };

@@ -84,7 +84,7 @@ exports.isVideoClipReady = function(id) {
         if ((snapshot) && (snapshot.exists()) && (snapshot.val().storage)) {
             return Promise.resolve(snapshot.val());
         } else {
-            return Promise.reject("videoClip not ready" + id);
+            return Promise.reject("videoClip not ready " + id);
         }
     });
 }; //end of isVideoClipReady
