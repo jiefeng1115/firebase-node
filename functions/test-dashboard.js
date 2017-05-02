@@ -18,16 +18,17 @@ peeqDashboard.listSensorRecordsAtDate(targetDateStr)
     });
 */
 
-/*
+
 peeqDashboard.listPlayerHighlightsAtDate(targetDateStr).catch((err) => {
     console.log(err);
 });
-*/
 
+
+/*
 peeqDashboard.generateAllHighlightsAtDate(targetDateStr)
     .then((results) => {
         console.log(results);
     }).catch((err) => {
         console.log(err);
     });
-
+*/

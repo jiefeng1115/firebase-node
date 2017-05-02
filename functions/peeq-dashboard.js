@@ -81,23 +81,41 @@ exports.listPlayerHighlightsAtDate = function(dateStr) {
 
         var promises = [];
         snapshots.forEach((snapshot) => {
-            var prom = peeqPlayerHighlightVideo.fetchPlayerHighlightVideoSnapshotWithPlayerHighlightId(snapshot.key);
+            var prom = peeqPlayerHighlightVideo.fetchPlayerHighlightVideoSnapshotWithPlayerHighlightId(snapshot.key)
+                .then((phVideoSnapshot) => {
+                    snapshot.phVideoSnapshot = phVideoSnapshot;
+                    return snapshot;
+                });
             promises.push(prom);
         });
 
-        return Promise.all(promises).then((phVideoSnapshots) => {
+        return Promise.all(promises).then((snapshots) => {
+            console.log("\ngeneratedVideos");
+            var snapshotsWithoutVideo = snapshots.filter((snap01) => {
+                var phVideoSnapshot = snap01.phVideoSnapshot;
+                if ((phVideoSnapshot) && (phVideoSnapshot.exists())) {
+                    var val = phVideoSnapshot.val();
+                    var keys = Object.keys(val);
+                    var key = keys[0];
+                    if (val[key].storage) {
+                        console.log(snap01.key, val[key].storage);
+                        return false;
+                    } else {
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
+            });
 
-            console.log("\ngeneratedVideoSnapshots");
-            var generatedVideoSnapshots = phVideoSnapshots.filter((snap01) => {
-                return ((snap01 !== null) && snap01.exists());
-            }).filter((snap02) => {
-                var val02 = snap02.val();
-                var key02s = Object.keys(val02);
-                var key02 = key02s[0];
-                return (val02[key02].storage) ? true : false;
-            }).logEachSnapshot();
+            console.log("\nsnapshotsWithoutVideo");
+            snapshotsWithoutVideo.forEach((snap02) => {
+                peeqFirebase.logSnapshotIfExist(snap02);
+                peeqFirebase.logSnapshotIfExist(snap02.phVideoSnapshot, "  ");
+                console.log("\n");
+            });
 
-            info.numOfGenerated = generatedVideoSnapshots.length;
+            info.numOfGenerated = info.numOfRecords - snapshotsWithoutVideo.length;
 
             console.log("\nlistPlayerHighlightsAtDate");
             for (var key in info) {

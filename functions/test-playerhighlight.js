@@ -2,7 +2,7 @@
 
 var peeqPlayerHighlight = require("./peeq-playerhighlight");
 
-var testPlayerHighlightId = "-KivZyOH0xcV4XoWBDTp";
+var testPlayerHighlightId = "-KivfPU1ao1n7aJIncws";
 
 var playerHighlight = new peeqPlayerHighlight.PlayerHighlight(testPlayerHighlightId);
 

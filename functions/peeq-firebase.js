@@ -86,3 +86,14 @@ Array.prototype.logEachSnapshot = function() {
     });
     return this;
 };
+
+exports.logSnapshotIfExist = function(snapshot, header) {
+    if ((snapshot) && (snapshot.exists())) {
+        if (header) {
+            console.log(header, snapshot.key, snapshot.val());
+        } else {
+            console.log(snapshot.key, snapshot.val());
+        }
+    }
+    return snapshot;
+};
