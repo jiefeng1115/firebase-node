@@ -30,3 +30,4 @@ peeqDashboard.generateAllHighlightsAtDate(targetDateStr)
     }).catch((err) => {
         console.log(err);
     });
+
