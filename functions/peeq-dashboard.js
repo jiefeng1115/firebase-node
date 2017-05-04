@@ -127,14 +127,9 @@ exports.listPlayerHighlightsAtDate = function(dateStr) {
                                 console.log(key, val[key].video, "\n");
                             }
                         } else {
-                            var prom02 = peeqStorage.downloadUrl(val[key].storage).then(urls => {
-                                if (urls[0]) {
-                                    var url = urls[0];
-                                    console.log(snap01.key, url, "\n");
-                                    return phVideoSnapshot.child(key).ref.child("video").set(url);
-                                } else {
-                                    return Promise.reject("invalid urls");
-                                }
+                            var prom02 = peeqStorage.downloadUrl(val[key].storage).then(url => {
+                                console.log(snap01.key, url, "\n");
+                                return phVideoSnapshot.child(key).ref.child("video").set(url);
                             });
                             promises02.push(prom02);
                         }

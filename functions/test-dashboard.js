@@ -5,13 +5,6 @@ var peeqDashboard = require("./peeq-dashboard");
 var targetDateStr = "4-29-2017";
 
 /*
-peeqDashboard.listRawVideosAtDate(targetDateStr)
-    .catch((err) => {
-        console.log(err);
-    });
-*/
-
-/*
 peeqDashboard.listSensorRecordsAtDate(targetDateStr)
     .catch((err) => {
         console.log(err);
@@ -42,6 +35,12 @@ if (process.argv[2] == "listSensorRecordsSnapshotsFromLocalSession") {
     peeqDashboard.listPlayerHighlightsAtDate(targetDateStr).catch((err) => {
         console.log(err);
     });
+} else if (process.argv[2] == "listRawVideosAtDate") {
+    targetDateStr = (process.argv[3]) ? process.argv[3] : targetDateStr;
+    peeqDashboard.listRawVideosAtDate(targetDateStr)
+        .catch((err) => {
+            console.log(err);
+        });
 }
 
 //N.B. 2017-04-29T21:38:36.668Z -Ki_sTOqb4RtLYqR50ry

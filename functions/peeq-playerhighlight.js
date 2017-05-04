@@ -143,8 +143,8 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
         console.log("generateTrackerStatisticIfNeeded", obj.id);
 
         var highlightedPDate = new peeqDate.PDate(obj.val.timestamp);
-        var startPDate = highlightedPDate.PDateWithTimeOffset(highlightedPDateOffsetStart); //10sec
-        var endPDate = highlightedPDate.PDateWithTimeOffset(highlightedPDateOffsetEnd); //5sec
+        var startPDate = highlightedPDate.PDateWithTimeOffset(highlightedPDateOffsetStart);
+        var endPDate = highlightedPDate.PDateWithTimeOffset(highlightedPDateOffsetEnd);
 
         console.log("time window", startPDate.dateStr, endPDate.dateStr);
 
