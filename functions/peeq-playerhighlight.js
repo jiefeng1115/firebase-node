@@ -158,17 +158,10 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
     }; //end of generateTrackerStatisticIfNeeded
 
 
-    //return a promise of the playerHighlightVideo storage or [clipStorage / transcodeTaskId]
+    //return a promise of result if a new playerHighlightVideo record is created
     this.generateHighlightWithStatistics = function(stats) {
         var obj = this;
-
-
-
-
-
-
         if (stats.length > 0) {
-
             //instead of generating the videoClip task, simply create a PlayerHighlightVideo firebase record
             var playerHighlightVideoInfo = {};
             playerHighlightVideoInfo.localSessions = stats.map(value => {
@@ -180,46 +173,14 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
             playerHighlightVideoInfo.timestamp = obj.val.timestamp;
             playerHighlightVideoInfo.user = obj.val.user;
 
-
-
-
-
-            var videoClips = stats.map(function(value) {
-                var videoClip = {};
-                videoClip.localSession = value.localSession;
-                videoClip.startTime = value.highlightStartTime;
-                videoClip.endTime = value.highlightEndTime;
-                videoClip.thumbnailAt = value.maxAt;
-                return videoClip;
-            });
-            console.log("videoClips", videoClips);
-
-            return peeqVideoClip.createObjsInFirebaseIfNeeded(videoClips).then(function(videoClipResults) {
-                var videoClipIds = videoClipResults.map(function(value) {
-                    return value.id;
-                });
-
-                return peeqPlayerHighlightVideo.createObjInFirebaseIfNeeded(obj.val.user, obj.id, videoClipIds).then(function(playerHighlightVideoResult) {
-                    console.log("playerHighlightVideoResult", playerHighlightVideoResult);
-                    /*
-                    if (!playerHighlightVideoResult.isNew) {
-                        return Promise.reject("playerHighlightVideo already exist " + playerHighlightVideoResult.id);
-                    } else {
-                        var playerHighlightVideo = new peeqPlayerHighlightVideo.PlayerHighlightVideo(playerHighlightVideoResult.id);
-                        return playerHighlightVideo.generateVideo();
-                    }
-                    */
-                    console.log("playerHighlightVideo already exist " + playerHighlightVideoResult.id);
-                    var playerHighlightVideo = new peeqPlayerHighlightVideo.PlayerHighlightVideo(playerHighlightVideoResult.id);
-                    return playerHighlightVideo.generateVideo(); //video storage or [clipStorage / transcodeTaskId]
-                });
-            });
+            return peeqPlayerHighlightVideo.createObjsInFirebaseIfNeededWithInfo(playerHighlightVideoInfo);
+        } else {
+            return Promise.reject("empty stats");
         }
-        return Promise.reject("empty stats");
     }; //end of generateHighlightWithStatistics
 
 
-    //return a promise of the playerHighlightVideo video storage or [clipStorage / transcodeTaskId]
+    //return a promise of result if a new playerHighlightVideo record is created
     this.generateHighlightIfNeeded = function() {
         console.log("generateHighlightIfNeeded", this.id);
         return this.fetchRelatedLocalSessionSnapshots().then(function(obj) {
