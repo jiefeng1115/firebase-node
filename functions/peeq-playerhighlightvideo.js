@@ -1,5 +1,5 @@
 /*jshint esversion: 6 */
-
+var peeqStandardObjects = require("./standard-objects/peeq-standard-objects");
 var peeqFirebase = require("./peeq-firebase");
 var admin = peeqFirebase.admin;
 var peeqVideoClip = require("./peeq-videoclip");
@@ -58,19 +58,21 @@ exports.createObjInFirebaseIfNeeded = function(userId, playerHighlightId, videoC
 }; //End of createObjInFirebaseIfNeeded
 
 exports.valIsEqualToInfo = function(v1, v2) {
-    return ((v1.playerHighlight == v2.playerHighlight) && (v1.localSessions == v2.localSessions) && (v1.offsetStart == v2.offsetStart) && (v1.offsetEnd == v2.offsetEnd) && (v1.timestamp == v2.timestamp));
+    if (!v1.localSessions) {
+        return false;
+    }
+    return ((v1.playerHighlight == v2.playerHighlight) && (v1.localSessions.isEqualTo(v2.localSessions)) && (v1.offsetStart == v2.offsetStart) && (v1.offsetEnd == v2.offsetEnd) && (v1.timestamp == v2.timestamp));
 };
 
 exports.createObjsInFirebaseIfNeededWithInfo = function(info) {
-    console.log("playerHighlightVideoInfo", info);
+    //console.log("createObjsInFirebaseIfNeededWithInfo", info);
 
     var db = admin.database();
     var ref = db.ref("playerHighlightVideos");
 
     //check if an equivlent obj already exist
     return ref.orderByChild("playerHighlight").equalTo(info.playerHighlight).once("value").then((snapshots) => {
-        console.log("snapshots", snapshots);
-
+        //console.log("snapshots", snapshots.val(), "\n");
         var snapshotsArr = peeqFirebase.snapshotsToArray(snapshots);
 
         var snapshotFound = snapshotsArr.find(snapshot => {
@@ -80,6 +82,7 @@ exports.createObjsInFirebaseIfNeededWithInfo = function(info) {
                 return false;
             }
         });
+        //console.log("snapshotFound", snapshotFound);
 
         if (snapshotFound) {
             var result = {};

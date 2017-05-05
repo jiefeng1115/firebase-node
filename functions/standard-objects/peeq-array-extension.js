@@ -30,3 +30,13 @@ Array.prototype.sortByKeyName = function(keyName) {
         }
     });
 };
+
+Array.prototype.isEqualTo = function(arr) {
+    if (this === arr) return true;
+    if (this === null || arr === null) return false;
+    if (this.length != arr.length) return false;
+    for (var i = 0; i < arr.length; ++i) {
+        if (arr[i] !== this[i]) return false;
+    }
+    return true;
+};
