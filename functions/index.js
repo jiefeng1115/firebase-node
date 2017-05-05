@@ -7,7 +7,10 @@ const functions = require('firebase-functions');
 
 var peeqLocalSession = require("./peeq-localsession");
 var peeqPlayerHighlight = require("./peeq-playerhighlight");
+var peeqPlayerHighlightVideo = require("./peeq-playerhighlightvideo");
 
+
+/*
 //N.B. if listen for the localSessions directly, multiple event will be generated per update.
 // Listens for new object added to /localSessions/:localSessionId/startDate
 exports.onLocalSessionStarted = functions.database.ref('/localSessions/{localSessionId}/startDate')
@@ -18,6 +21,7 @@ exports.onLocalSessionStarted = functions.database.ref('/localSessions/{localSes
         //console.log('onLocalSessionStarted', event.params.localSessionId, original);
         return null;
     }); //end of onLocalSessionStarted
+*/
 
 exports.onVideoStorage = functions.database.ref('/videos/{localSessionId}/{videoId}/storage').onWrite(event => {
     console.log("onVideoStorage event", event);
@@ -44,3 +48,28 @@ exports.onVideoStorage = functions.database.ref('/videos/{localSessionId}/{video
         return null;
     }); //end of isReadyForProcessingPlayerHighlights
 }); //end of onVideoStorage
+
+
+exports.onPlayerHighlightVideoPlayerHighlight = functions.database.ref('/playerHighlightVideos/{playerHighlightVideoId}/playerHighlight').onWrite(event => {
+    console.log("onPlayerHighlightVideoPlayerHighlight event", event);
+    var playerHighlightVideoId = event.params.playerHighlightVideoId;
+
+    var playerHighlightVideo = new peeqPlayerHighlightVideo.PlayerHighlightVideo(playerHighlightVideoId);
+    playerHighlightVideo.fetchSnapshotIfNeeded().then(snapshot => {
+        if ((snapshot) && (snapshot.exists())) {
+            var val = snapshot.val();
+            if (!val.storage) {
+                //video not generated yet, create a message to process it
+                return playerHighlightVideo.publishGenerateVideoMessage();
+            } else {
+                console.log("video of playerHighlightVideo " + playerHighlightVideoId + " already exist, stop processing");
+            }
+        } else {
+            return Promise.reject("Invalid playerHighlightVideo " + playerHighlightVideoId);
+        }
+        return null;
+    }).catch(err => {
+        console.error(err);
+        return Promise.reject(err);
+    });
+}); //end of onPlayerHighlightVideoPlayerHighlight

@@ -4,6 +4,7 @@ var peeqFirebase = require("./peeq-firebase");
 var admin = peeqFirebase.admin;
 var peeqVideoClip = require("./peeq-videoclip");
 var peeqAppEngineFirebase = require("./peeq-appengine-firebase");
+var peeqPubSub = require("./peeq-pubsub");
 
 exports.objsAreEqual = function(v1, v2) {
     //console.log("objsAreEqual", v1, v2);
@@ -174,6 +175,17 @@ exports.PlayerHighlightVideo = function PlayerHighlightVideo(id, snapshot) {
             }
         });
     }; //end of generateVideo
+
+
+    this.publishGenerateVideoMessage = function() {
+        var newMessage = {};
+        newMessage.type = "generatePlayerHighlightVideo";
+        newMessage.targetId = this.id;
+
+        return peeqPubSub.publishMessage("onTranscodeTaskCreated", newMessage).then((result) => {
+            return Promise.resolve(newMessage);
+        });
+    }; //end of publishGenerateVideoMessage
 
 }; //end of PlayerHighlightVideo
 
