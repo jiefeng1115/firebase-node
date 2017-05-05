@@ -16,4 +16,14 @@ if (process.argv[2] == "createObjsInFirebaseIfNeededWithInfo") {
     }).catch(err => {
         console.error(err);
     });
+} else if (process.argv[2] == "publishGenerateVideoMessage") {
+    var playerHighlightVideoId = process.argv[3];
+    console.log("playerHighlightVideoId", playerHighlightVideoId);
+
+    var playerHighlightVideo = new peeqPlayerHighlightVideo.PlayerHighlightVideo(playerHighlightVideoId);
+    playerHighlightVideo.publishGenerateVideoMessage().then(result => {
+        console.log("result", result);
+    }).catch(err => {
+        console.error(err);
+    });
 }

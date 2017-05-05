@@ -181,10 +181,7 @@ exports.PlayerHighlightVideo = function PlayerHighlightVideo(id, snapshot) {
         var newMessage = {};
         newMessage.type = "generatePlayerHighlightVideo";
         newMessage.targetId = this.id;
-
-        return peeqPubSub.publishMessage("onTranscodeTaskCreated", newMessage).then((result) => {
-            return Promise.resolve(newMessage);
-        });
+        return peeqPubSub.publishMessage("onTranscodeTaskCreated", newMessage);
     }; //end of publishGenerateVideoMessage
 
 }; //end of PlayerHighlightVideo
