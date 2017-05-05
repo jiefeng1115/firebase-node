@@ -9,8 +9,8 @@ var firstBy = require('thenby');
 var peeqPlayerHighlightVideo = require("./peeq-playerhighlightvideo");
 var peeqVideoClip = require("./peeq-videoclip");
 
-const highlightedPDateOffsetStart = -1000 * 15; //TODO: Make this dynamic depends on the tracker data
-const highlightedPDateOffsetEnd = 1000 * -5;
+const highlightedPDateOffsetStart = -1000 * 10; //TODO: Make this dynamic depends on the tracker data
+const highlightedPDateOffsetEnd = 1;
 const generateHighlightDefaultNumOfVideos = 3; //TODO: Make this dynamic depends on the tracker data
 
 //PlayerHighlight class
@@ -162,7 +162,28 @@ exports.PlayerHighlight = function PlayerHighlight(id, snapshot) {
     this.generateHighlightWithStatistics = function(stats) {
         var obj = this;
 
+
+
+
+
+
         if (stats.length > 0) {
+
+            //instead of generating the videoClip task, simply create a PlayerHighlightVideo firebase record
+            var playerHighlightVideoInfo = {};
+            playerHighlightVideoInfo.localSessions = stats.map(value => {
+                return value.localSession;
+            });
+            playerHighlightVideoInfo.offsetStart = highlightedPDateOffsetStart;
+            playerHighlightVideoInfo.offsetEnd = highlightedPDateOffsetEnd;
+            playerHighlightVideoInfo.playerHighlight = obj.id;
+            playerHighlightVideoInfo.timestamp = obj.val.timestamp;
+            playerHighlightVideoInfo.user = obj.val.user;
+
+
+
+
+
             var videoClips = stats.map(function(value) {
                 var videoClip = {};
                 videoClip.localSession = value.localSession;
