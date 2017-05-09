@@ -44,7 +44,7 @@ exports.createObjInFirebaseIfNeeded = function(videoClip) {
 };
 
 //return Promise.all(promises)
-this.createObjsInFirebaseIfNeeded = function(videoClips) {
+exports.createObjsInFirebaseIfNeeded = function(videoClips) {
     var promises = [];
     videoClips.forEach(function(videoClip) {
         var promise = exports.createObjInFirebaseIfNeeded(videoClip);
