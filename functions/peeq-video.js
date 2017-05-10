@@ -75,8 +75,9 @@ exports.Video = function Video(localSessionId, videoId, snapshot) {
     //return a promise of the endDateFixing task obj
     this.generatEndDateFixingTask = function() {
         var newObj = {};
-        newObj.type = "endDateFixing";
-        newObj.videoId = this.id;
+        newObj.type = "fixVideoMissingEndDate";
+        newObj.localSessionId = this.localSessionId;
+        newObj.videoId = this.videoId;
         return peeqPubSub.publishMessage("onTranscodeTaskCreated", newObj).then(function(value) {
             return Promise.resolve(newObj);
         });
